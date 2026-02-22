@@ -1,10 +1,12 @@
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Single cell for the Normal board.
  */
 function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRefs }) {
-    if (!answer) return <div className="normal-cell">Cargando...</div>;
+    const { t } = useTranslation();
+    if (!answer) return <div className="normal-cell">{t('game.loading', 'Cargando...')}</div>;
     const isCorrect = answer.status === 'correct';
     const isWrong = answer.status === 'wrong';
 
@@ -58,6 +60,7 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
 }
 
 export default function NormalBoard({ tasks, answers, onAnswerChange }) {
+    const { t } = useTranslation();
     const inputRefs = useRef([]);
 
     const handleKeyDown = (e, cellIdx, fieldIdx) => {
@@ -87,7 +90,7 @@ export default function NormalBoard({ tasks, answers, onAnswerChange }) {
 
     return (
         <div className="normal-board">
-            <h2 className="section-label">Tablero Normal (4x4)</h2>
+            <h2 className="section-label">{t('board.operaciones')} (4x4)</h2>
             <div className="normal-grid">
                 {tasks.map((task, idx) => (
                     <NormalCell

@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * NumberList: shows the 16 sorted numbers (8 visible, 8 hidden).
@@ -6,6 +7,7 @@ import React, { useMemo } from 'react';
  * they match a number used in a correct pair.
  */
 export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers, className = "" }) {
+    const { t } = useTranslation();
     const displayItems = useMemo(() => {
         // 1. Initialize slots from sorted numbers
         const items = sortedNumbers.map((num, i) => ({
@@ -36,7 +38,7 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers,
 
     return (
         <section className="number-list-section">
-            <h2 className="section-label">Números disponibles</h2>
+            <h2 className="section-label">{t('board.numeros_disponibles')}</h2>
             <div className={`number-list ${className}`}>
                 {displayItems.map((item) => {
                     let className = 'number-slot';

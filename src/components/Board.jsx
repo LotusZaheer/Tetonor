@@ -1,6 +1,8 @@
 import React, { useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function Board({ pairs, answers, onAnswerChange }) {
+    const { t } = useTranslation();
     const inputRefs = useRef([]);
 
     const setRef = useCallback((el, pairIdx, inputIdx) => {
@@ -67,7 +69,7 @@ export default function Board({ pairs, answers, onAnswerChange }) {
 
     return (
         <section className="board-section">
-            <h2 className="section-label">Tablero</h2>
+            <h2 className="section-label">{t('board.tablero')}</h2>
             <div className="board-grid">
                 {pairs.map((pair, pairIdx) => {
                     const ans = answers[pairIdx];
@@ -102,7 +104,7 @@ export default function Board({ pairs, answers, onAnswerChange }) {
                                     onKeyDown={(e) => handleKeyDown(e, pairIdx, 0)}
                                     placeholder="?"
                                     disabled={ans.status === 'correct'}
-                                    aria-label={`Par ${pairIdx + 1}, número 1`}
+                                    aria-label={t('board.pair_num_1', { num: pairIdx + 1, defaultValue: `Par ${pairIdx + 1}, número 1` })}
                                     tabIndex={0}
                                 />
                                 <input
@@ -116,7 +118,7 @@ export default function Board({ pairs, answers, onAnswerChange }) {
                                     onKeyDown={(e) => handleKeyDown(e, pairIdx, 1)}
                                     placeholder="?"
                                     disabled={ans.status === 'correct'}
-                                    aria-label={`Par ${pairIdx + 1}, número 2`}
+                                    aria-label={t('board.pair_num_2', { num: pairIdx + 1, defaultValue: `Par ${pairIdx + 1}, número 2` })}
                                     tabIndex={0}
                                 />
                             </div>

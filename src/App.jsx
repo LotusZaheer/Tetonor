@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { generatePuzzle, checkPairAnswer, checkTask } from './utils/gameEngine';
 import GameHeader from './components/GameHeader';
 import Board from './components/Board';
@@ -6,6 +7,8 @@ import NumberList from './components/NumberList';
 import NormalBoard from './components/NormalBoard';
 import HelperSidebar from './components/HelperSidebar';
 import RulesModal from './components/RulesModal';
+import ThemeToggle from './components/ThemeToggle';
+import LanguageSelector from './components/LanguageSelector';
 
 function createInitialAnswers(count, isNormal = false) {
   return Array.from({ length: count }, () => ({
@@ -17,6 +20,7 @@ function createInitialAnswers(count, isNormal = false) {
 }
 
 export default function App() {
+  const { t } = useTranslation();
   const [puzzle, setPuzzle] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [isSolved, setIsSolved] = useState(false);
@@ -93,10 +97,10 @@ export default function App() {
       return (
         <div className="placeholder-container">
           <div className="placeholder-card">
-            <h2 className="placeholder-title">Modo Difícil</h2>
-            <p className="placeholder-text">Próximamente...</p>
-            <p className="placeholder-text">Estamos diseñando los desafíos de este nivel.</p>
-            <button className="btn-new-game" onClick={() => setMode('easy')}>Volver al Modo Fácil</button>
+            <h2 className="placeholder-title">{t('rules.hard_title')}</h2>
+            <p className="placeholder-text">{t('rules.coming_soon')}</p>
+            <p className="placeholder-text">{t('rules.coming_soon_desc', 'Estamos diseñando los desafíos de este nivel.')}</p>
+            <button className="btn-new-game" onClick={() => setMode('easy')}>{t('rules.back_to_easy', 'Volver al Modo Fácil')}</button>
           </div>
         </div>
       );
@@ -110,7 +114,7 @@ export default function App() {
     if (answers.length !== requiredAnswers) {
       return (
         <div className="placeholder-container">
-          <p className="placeholder-text">Cargando modo...</p>
+          <p className="placeholder-text">{t('game.loading', 'Cargando modo...')}</p>
         </div>
       );
     }
@@ -140,7 +144,7 @@ export default function App() {
                 className="mobile-list-compact"
               />
               <div className="mobile-counters-box side-counters">
-                <h3 className="section-title small">Operaciones</h3>
+                <h3 className="section-title small">{t('board.operaciones')}</h3>
                 <div className="mobile-counter-text vertical">
                   <span>+: {remainingSums}/8</span>
                   <span>x: {remainingProds}/8</span>
@@ -183,10 +187,11 @@ export default function App() {
 
   return (
     <div className={`app-container mode-${mode}`}>
+      <ThemeToggle />
       <button
         className="help-icon"
         onClick={() => setShowRules(true)}
-        title="Ver Reglas"
+        title={t('rules.view_rules')}
       >
         ?
       </button>
@@ -202,9 +207,7 @@ export default function App() {
       <main className="game-main">
         {renderContent()}
       </main>
-      <footer className="game-footer">
-        <p>Tab / Shift+Tab para navegar · Flechas para moverse · Verificación automática</p>
-      </footer>
+      <LanguageSelector />
     </div>
   );
 }

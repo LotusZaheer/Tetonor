@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function HelperSidebar({ answers, tasks, isWeb }) {
+    const { t } = useTranslation();
     // 1. Calculate operation usage
     if (!answers || !tasks || answers.length !== tasks.length) return null;
     const sumCount = answers.filter(a => a.status === 'correct' && a.op === '+').length;
@@ -30,10 +32,10 @@ export default function HelperSidebar({ answers, tasks, isWeb }) {
             const pairKey = JSON.stringify([...t.target].sort((a, b) => a - b));
 
             if (t.type === '+' && !usedInProd.has(pairKey)) {
-                pendingPairs.push({ pair: t.target, missing: 'multiplicación' });
+                pendingPairs.push({ pair: t.target, missing: t('sidebar.missing_prod') });
             }
             if (t.type === '*' && !usedInSum.has(pairKey)) {
-                pendingPairs.push({ pair: t.target, missing: 'suma' });
+                pendingPairs.push({ pair: t.target, missing: t('sidebar.missing_sum') });
             }
         }
     });
@@ -44,27 +46,27 @@ export default function HelperSidebar({ answers, tasks, isWeb }) {
     return (
         <aside className="helper-sidebar">
             <section className="sidebar-section desktop-only">
-                <h3 className="section-title">Operaciones disponibles</h3>
+                <h3 className="section-title">{t('sidebar.available_ops')}</h3>
                 <div className="counter-item">
-                    <span>Sumas disponibles:</span>
+                    <span>{t('sidebar.sums_available')}</span>
                     <span className={`counter-val ${remainingSums === 0 ? 'text-red' : ''}`}>{remainingSums}/8</span>
                 </div>
                 <div className="counter-item">
-                    <span>Multiplicaciones:</span>
+                    <span>{t('sidebar.prods_available')}</span>
                     <span className={`counter-val ${remainingProds === 0 ? 'text-red' : ''}`}>{remainingProds}/8</span>
                 </div>
             </section>
 
             {!isWeb && (
                 <section className="sidebar-section">
-                    <h3 className="section-title">Ayuda: Números en uso</h3>
-                    <p className="sidebar-hint">Te falta usar estos números en su otra operación:</p>
+                    <h3 className="section-title">{t('sidebar.pending_desc')}</h3>
+                    <p className="sidebar-hint">{t('sidebar.pending_hint')}</p>
                     <ul className="pending-list">
-                        {uniquePending.length === 0 && <li className="empty-hint">Resuelve una casilla para ver pistas aquí...</li>}
+                        {uniquePending.length === 0 && <li className="empty-hint">{t('sidebar.empty_hint')}</li>}
                         {uniquePending.map((p, i) => (
                             <li key={i} className="pending-item">
-                                <span className="pair-nums">{p.pair[0]} y {p.pair[1]}</span>
-                                <span className="missing-hint">→ {p.missing} pendiente</span>
+                                <span className="pair-nums">{p.pair[0]} {t('sidebar.and')} {p.pair[1]}</span>
+                                <span className="missing-hint">→ {p.missing}</span>
                             </li>
                         ))}
                     </ul>

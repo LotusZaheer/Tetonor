@@ -1,18 +1,20 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function GameHeader({ onNewGame, isSolved, currentMode, onSetMode }) {
+    const { t } = useTranslation();
     const modes = [
-        { id: 'easy', label: 'fácil' },
-        { id: 'normal', label: 'normal' },
-        { id: 'hard', label: 'difícil' },
+        { id: 'easy', label: t('game.easy') },
+        { id: 'normal', label: t('game.normal') },
+        { id: 'hard', label: t('game.hard') },
     ];
 
     return (
         <header className="game-header">
-            <h1 className="game-title">Tetonor</h1>
+            <h1 className="game-title">{t('game.title')}</h1>
 
             <div className="difficulty-container">
-                <span className="mode-label">Modo:</span>
+                <span className="mode-label">{t('game.mode')}</span>
                 <div className="difficulty-selector">
                     {modes.map((m) => (
                         <button
@@ -25,12 +27,12 @@ export default function GameHeader({ onNewGame, isSolved, currentMode, onSetMode
                     ))}
                 </div>
             </div>
-            <p className="game-subtitle">Encuentra los pares que suman y multiplican</p>
+            <p className="game-subtitle">{t('game.subtitle')}</p>
             <div className="header-actions">
                 <button className="btn-new-game" onClick={onNewGame}>
-                    Nuevo Juego
+                    {t('game.new_game')}
                 </button>
-                {isSolved && <span className="solved-badge">🎉 ¡Completado!</span>}
+                {isSolved && <span className="solved-badge">{t('game.solved')}</span>}
             </div>
         </header>
     );
