@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
  * Single cell for the Normal board.
  */
 function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRefs }) {
+    if (!answer) return <div className="normal-cell">Cargando...</div>;
     const isCorrect = answer.status === 'correct';
     const isWrong = answer.status === 'wrong';
 

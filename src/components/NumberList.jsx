@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
  * Keeps exactly 16 slots. Hidden slots are revealed only when 
  * they match a number used in a correct pair.
  */
-export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers }) {
+export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers, className = "" }) {
     const displayItems = useMemo(() => {
         // 1. Initialize slots from sorted numbers
         const items = sortedNumbers.map((num, i) => ({
@@ -37,7 +37,7 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers 
     return (
         <section className="number-list-section">
             <h2 className="section-label">Números disponibles</h2>
-            <div className="number-list">
+            <div className={`number-list ${className}`}>
                 {displayItems.map((item) => {
                     let className = 'number-slot';
                     let displayValue = '?';

@@ -159,9 +159,9 @@ body {
 }
 
 .game-subtitle {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: var(--gap-xs);
 }
 
 .header-actions {
@@ -239,6 +239,15 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: var(--gap-xs);
+}
+
+.game-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--accent-blue);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  margin-bottom: 2px;
 }
 
 /* =============================================
@@ -384,17 +393,27 @@ body {
 .number-list-section {
   padding: var(--gap-xs) 0;
   flex-shrink: 0;
+  width: 100%;
 }
 
 .number-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--gap-sm);
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: var(--gap-xs);
+  width: 100%;
+}
+
+/* Large monitors: 2 rows of 8 only for Easy Mode */
+@media (min-width: 1400px) {
+  .mode-easy .number-list {
+    grid-template-columns: repeat(8, 1fr) !important;
+    max-width: 800px;
+    margin: 0 auto;
+  }
 }
 
 .number-slot {
-  width: 42px;
+  min-width: 32px;
   height: 36px;
   display: flex;
   align-items: center;
@@ -447,7 +466,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--gap-md);
+  gap: var(--gap-sm);
   min-height: 0;
   overflow-y: auto;
   padding-right: 4px;
@@ -462,10 +481,10 @@ body {
 .normal-cell {
   background: var(--bg-card);
   border-radius: 4px;
-  padding: 3px;
+  padding: 2px 3px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   border: 1px solid transparent;
   box-shadow: var(--shadow-card);
   transition: all var(--transition-normal);
@@ -489,7 +508,7 @@ body {
 
 .task-value {
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--accent-blue);
 }
@@ -500,17 +519,32 @@ body {
   gap: 3px;
 }
 
+.num-input {
+  padding: 6px 12px;
+  border: 1px solid var(--bg-input);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+  outline: none;
+  width: 100%;
+  height: 30px;
+  /* 0.9 of original 34ish */
+}
+
 .normal-inputs .num-input {
   flex: 1;
   min-width: 0;
-  height: 28px;
+  height: 25px;
   font-size: 0.85rem;
-  padding: 2px;
+  padding: 1px 4px;
 }
 
 .op-input {
   width: 24px;
-  height: 28px;
+  height: 25px;
   text-align: center;
   font-family: var(--font-display);
   font-weight: 700;
@@ -616,6 +650,22 @@ body {
   padding: 10px;
 }
 
+.mobile-only {
+  display: none;
+}
+
+.top-counters {
+  margin-bottom: var(--gap-xs);
+}
+
+.mobile-counters-box {
+  background: var(--bg-card);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-card);
+}
+
 /* =============================================
    Footer
    ============================================= */
@@ -714,8 +764,91 @@ body {
   }
 
   .helper-sidebar {
+    display: none !important;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  .mobile-numbers-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2%;
+    /* Small gap between 65% and 30% */
+    padding: var(--gap-xs) 0;
     width: 100%;
+  }
+
+  .mode-normal .number-list-section {
+    width: 65% !important;
+    padding: 0;
+  }
+
+  .mode-easy .number-list-section {
+    width: 100% !important;
+    padding: var(--gap-xs) 0;
+  }
+
+  .mobile-list-compact {
+    width: 100% !important;
+    flex: none !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 3px !important;
+  }
+
+  .mobile-list-compact .number-slot {
+    height: 24px !important;
+    font-size: 0.65rem !important;
+  }
+
+  .side-counters {
+    width: 30% !important;
+    flex: none !important;
+    padding: 6px 4px !important;
     box-sizing: border-box;
+  }
+
+  .mobile-counter-text.vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    /* Center text within the 30% box */
+    font-size: 0.75rem;
+  }
+
+  .section-title.small {
+    font-size: 0.65rem;
+    margin-bottom: 4px;
+    text-align: center;
+    border-bottom: 1px solid var(--accent-blue);
+  }
+
+  /* Hide the standard list only in Normal Mode on mobile, 
+     because we use the .mobile-list-compact version instead. */
+  .mode-normal .number-list:not(.mobile-list-compact) {
+    display: none !important;
+  }
+
+  /* Ensure Easy Mode numbers use a 2x8 grid on mobile */
+  .mode-easy .number-list {
+    display: grid !important;
+    grid-template-columns: repeat(8, 1fr) !important;
+    width: 100% !important;
+    gap: 4px !important;
+  }
+
+  /* Make slots smaller on mobile Easy Mode to fit 8 across */
+  .mode-easy .number-list .number-slot {
+    height: 30px !important;
+    font-size: 0.8rem !important;
   }
 
   .difficulty-container {
@@ -790,22 +923,27 @@ body {
   .num-input {
     padding: 2px;
     font-size: 0.75rem;
-    height: 26px;
+    height: 23px;
+    /* 0.9 of 26 */
     width: 100%;
   }
 
   .op-input {
     width: 22px;
-    height: 26px;
+    height: 23px;
+    /* 0.9 of 26 */
     font-size: 0.75rem;
   }
 
   .number-list {
+    grid-template-columns: repeat(8, 1fr);
     gap: 4px;
+    width: 100%;
   }
 
   .number-slot {
-    width: 30px;
+    min-width: 0;
+    width: auto;
     height: 30px;
     font-size: 0.7rem;
   }

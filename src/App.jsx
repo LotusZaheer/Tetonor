@@ -102,6 +102,24 @@ export default function App() {
 
     if (!puzzle) return null;
 
+    // GUARD: Ensure answers array matches the mode's requirement
+    // This prevents crashes during the transitional render when mode changes but answers haven't updated yet.
+    const requiredAnswers = mode === 'easy' ? puzzle.pairs.length : puzzle.normalTasks.length;
+    if (answers.length !== requiredAnswers) {
+      return (
+        <div className="placeholder-container">
+          <p className="placeholder-text">Cargando modo...</p>
+        </div>
+      );
+    }
+    if (!puzzle) return null;
+
+    // Move counters logic here or use a component
+    const sumCount = answers.filter(a => a.status === 'correct' && a.op === '+').length;
+    const prodCount = answers.filter(a => a.status === 'correct' && (a.op === '*' || a.op === 'x')).length;
+    const remainingSums = Math.max(0, 8 - sumCount);
+    const remainingProds = Math.max(0, 8 - prodCount);
+
     if (mode === 'normal') {
       return (
         <div className="normal-layout">
@@ -111,15 +129,35 @@ export default function App() {
               answers={answers}
               onAnswerChange={handleNormalAnswerChange}
             />
-            <NumberList
-              sortedNumbers={puzzle.sortedNumbers}
-              visibleIndices={puzzle.visibleIndices}
-              usedNumbers={usedNumbers}
-            />
+            {/* Mobile Layout: Numbers + Counters on side */}
+            <div className="mobile-only mobile-numbers-wrapper">
+              <NumberList
+                sortedNumbers={puzzle.sortedNumbers}
+                visibleIndices={puzzle.visibleIndices}
+                usedNumbers={usedNumbers}
+                className="mobile-list-compact"
+              />
+              <div className="mobile-counters-box side-counters">
+                <h3 className="section-title small">Operaciones</h3>
+                <div className="mobile-counter-text vertical">
+                  <span>+: {remainingSums}/8</span>
+                  <span>x: {remainingProds}/8</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="desktop-only">
+              <NumberList
+                sortedNumbers={puzzle.sortedNumbers}
+                visibleIndices={puzzle.visibleIndices}
+                usedNumbers={usedNumbers}
+              />
+            </div>
           </div>
           <HelperSidebar
             answers={answers}
             tasks={puzzle.normalTasks}
+            isWeb={true}
           />
         </div>
       );
@@ -142,7 +180,7 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
+    <div className={`app-container mode-${mode}`}>
       <GameHeader
         onNewGame={startNewGame}
         isSolved={isSolved}

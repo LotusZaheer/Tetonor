@@ -71,6 +71,7 @@ export default function Board({ pairs, answers, onAnswerChange }) {
             <div className="board-grid">
                 {pairs.map((pair, pairIdx) => {
                     const ans = answers[pairIdx];
+                    if (!ans) return null; // Defensive guard
                     const statusClass = ans.status === 'correct'
                         ? 'pair-correct'
                         : ans.status === 'wrong'

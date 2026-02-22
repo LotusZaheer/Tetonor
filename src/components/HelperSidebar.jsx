@@ -1,7 +1,8 @@
 import React from 'react';
 
-export default function HelperSidebar({ answers, tasks }) {
+export default function HelperSidebar({ answers, tasks, isWeb }) {
     // 1. Calculate operation usage
+    if (!answers || !tasks || answers.length !== tasks.length) return null;
     const sumCount = answers.filter(a => a.status === 'correct' && a.op === '+').length;
     const prodCount = answers.filter(a => a.status === 'correct' && (a.op === '*' || a.op === 'x')).length;
 
@@ -42,7 +43,7 @@ export default function HelperSidebar({ answers, tasks }) {
 
     return (
         <aside className="helper-sidebar">
-            <section className="sidebar-section">
+            <section className="sidebar-section desktop-only">
                 <h3 className="section-title">Operaciones disponibles</h3>
                 <div className="counter-item">
                     <span>Sumas disponibles:</span>
@@ -54,19 +55,21 @@ export default function HelperSidebar({ answers, tasks }) {
                 </div>
             </section>
 
-            <section className="sidebar-section">
-                <h3 className="section-title">Ayuda: Números en uso</h3>
-                <p className="sidebar-hint">Te falta usar estos números en su otra operación:</p>
-                <ul className="pending-list">
-                    {uniquePending.length === 0 && <li className="empty-hint">Resuelve una casilla para ver pistas aquí...</li>}
-                    {uniquePending.map((p, i) => (
-                        <li key={i} className="pending-item">
-                            <span className="pair-nums">{p.pair[0]} y {p.pair[1]}</span>
-                            <span className="missing-hint">→ {p.missing} pendiente</span>
-                        </li>
-                    ))}
-                </ul>
-            </section>
+            {!isWeb && (
+                <section className="sidebar-section">
+                    <h3 className="section-title">Ayuda: Números en uso</h3>
+                    <p className="sidebar-hint">Te falta usar estos números en su otra operación:</p>
+                    <ul className="pending-list">
+                        {uniquePending.length === 0 && <li className="empty-hint">Resuelve una casilla para ver pistas aquí...</li>}
+                        {uniquePending.map((p, i) => (
+                            <li key={i} className="pending-item">
+                                <span className="pair-nums">{p.pair[0]} y {p.pair[1]}</span>
+                                <span className="missing-hint">→ {p.missing} pendiente</span>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
         </aside>
     );
 }
