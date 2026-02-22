@@ -22,9 +22,10 @@ function shuffle(array) {
  * Returns:
  * {
  *   pairs: [{ a, b, sum, product }],       // 8 pairs with their results
+ *   normalTasks: [{ value, type, target: [a, b] }], // 16 independent results shuffled
  *   sortedNumbers: number[],                // all 16 numbers sorted
  *   visibleIndices: Set<number>,            // indices (in sortedNumbers) that are visible
- *   hiddenIndices: Set<number>,             // indices that are hidden (player must find them)
+ *   hiddenIndices: Set<number>,             // indices that are hidden
  * }
  */
 export function generatePuzzle() {
@@ -32,23 +33,26 @@ export function generatePuzzle() {
     const numbers = Array.from({ length: 16 }, () => randomInt(1, 99));
 
     // 2. Shuffle and pair them into 8 pairs
-    const shuffled = shuffle(numbers);
+    const shuffledNumbers = shuffle(numbers);
     const pairs = [];
     for (let i = 0; i < 16; i += 2) {
-        const a = shuffled[i];
-        const b = shuffled[i + 1];
-        pairs.push({
-            a,
-            b,
-            sum: a + b,
-            product: a * b,
-        });
+        const a = shuffledNumbers[i];
+        const b = shuffledNumbers[i + 1];
+        pairs.push({ a, b, sum: a + b, product: a * b });
     }
 
-    // 3. Sort all 16 numbers
+    // 3. Create 16 independent tasks for Normal Mode
+    let normalTasks = [];
+    pairs.forEach(p => {
+        normalTasks.push({ value: p.sum, type: '+', target: [p.a, p.b] });
+        normalTasks.push({ value: p.product, type: '*', target: [p.a, p.b] });
+    });
+    normalTasks = shuffle(normalTasks);
+
+    // 4. Sort all 16 numbers
     const sortedNumbers = [...numbers].sort((x, y) => x - y);
 
-    // 4. Pick 8 random indices to show, 8 to hide
+    // 5. Pick 8 random indices to show, 8 to hide
     const indices = Array.from({ length: 16 }, (_, i) => i);
     const shuffledIndices = shuffle(indices);
     const visibleIndices = new Set(shuffledIndices.slice(0, 8));
@@ -56,6 +60,7 @@ export function generatePuzzle() {
 
     return {
         pairs,
+        normalTasks,
         sortedNumbers,
         visibleIndices,
         hiddenIndices,
@@ -63,21 +68,30 @@ export function generatePuzzle() {
 }
 
 /**
+ * Validates a single task (result, num1, op, num2).
+ * op can be '+' or '*' (also translates 'x' to '*')
+ */
+export function checkTask(task, num1, num2, op) {
+    const operation = op === 'x' ? '*' : op;
+    if (operation !== task.type) return false;
+
+    if (operation === '+') {
+        return (num1 + num2 === task.value) &&
+            ((num1 === task.target[0] && num2 === task.target[1]) ||
+                (num1 === task.target[1] && num2 === task.target[0]));
+    } else {
+        return (num1 * num2 === task.value) &&
+            ((num1 === task.target[0] && num2 === task.target[1]) ||
+                (num1 === task.target[1] && num2 === task.target[0]));
+    }
+}
+
+/**
  * Checks if two numbers correctly match a pair's sum and product.
+ * (Easy Mode helper)
  */
 export function checkPairAnswer(pair, num1, num2) {
     const sumOk = num1 + num2 === pair.sum;
     const productOk = num1 * num2 === pair.product;
     return sumOk && productOk;
-}
-
-/**
- * Checks if ALL pairs have been correctly solved.
- */
-export function checkAllAnswers(pairs, answers) {
-    return pairs.every((pair, i) => {
-        const ans = answers[i];
-        if (ans.num1 === null || ans.num2 === null) return false;
-        return checkPairAnswer(pair, ans.num1, ans.num2);
-    });
 }
