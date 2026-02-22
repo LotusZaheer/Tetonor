@@ -102,8 +102,9 @@ body {
 
 .difficulty-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--gap-md);
+  gap: var(--gap-xs);
   margin: var(--gap-xs) 0;
 }
 
@@ -855,13 +856,27 @@ body {
   }
 
   .difficulty-container {
-    flex-direction: column;
-    gap: var(--gap-xs);
-    margin: var(--gap-sm) 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: var(--gap-sm);
+    margin: 2px 0;
   }
 
   .mode-label {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .difficulty-selector {
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .btn-mode {
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 4px;
   }
 
   .game-title {
