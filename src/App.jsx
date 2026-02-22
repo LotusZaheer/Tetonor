@@ -5,6 +5,7 @@ import Board from './components/Board';
 import NumberList from './components/NumberList';
 import NormalBoard from './components/NormalBoard';
 import HelperSidebar from './components/HelperSidebar';
+import RulesModal from './components/RulesModal';
 
 function createInitialAnswers(count, isNormal = false) {
   return Array.from({ length: count }, () => ({
@@ -20,6 +21,7 @@ export default function App() {
   const [answers, setAnswers] = useState([]);
   const [isSolved, setIsSolved] = useState(false);
   const [mode, setMode] = useState('normal');
+  const [showRules, setShowRules] = useState(false);
 
   const startNewGame = useCallback(() => {
     const p = generatePuzzle();
@@ -181,6 +183,16 @@ export default function App() {
 
   return (
     <div className={`app-container mode-${mode}`}>
+      <button
+        className="help-icon"
+        onClick={() => setShowRules(true)}
+        title="Ver Reglas"
+      >
+        ?
+      </button>
+
+      {showRules && <RulesModal onClose={() => setShowRules(false)} />}
+
       <GameHeader
         onNewGame={startNewGame}
         isSolved={isSolved}

@@ -969,3 +969,159 @@ body {
     max-width: 260px;
   }
 }
+
+/* =============================================
+   Help Icon & Rules Modal
+   ============================================= */
+.help-icon {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-input);
+  color: var(--accent-blue);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-card);
+}
+
+.help-icon:hover {
+  transform: scale(1.1);
+  background: var(--bg-input);
+  box-shadow: var(--shadow-glow);
+}
+
+.rules-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 12, 18, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.rules-modal-content {
+  background: var(--bg-card);
+  width: 95%;
+  max-width: 450px;
+  max-height: 90vh;
+  border-radius: 12px;
+  border: 1px solid var(--bg-input);
+  position: relative;
+  padding: 16px;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: modal-pop 0.3s ease-out;
+}
+
+@keyframes modal-pop {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  color: var(--accent-red);
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.rules-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rules-section p {
+  line-height: 1.5;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.rules-header {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  margin-bottom: 6px;
+  padding-left: 8px;
+  border-left: 3px solid var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rules-header.easy {
+  border-color: var(--accent-green);
+}
+
+.rules-header.normal {
+  border-color: var(--accent-blue);
+}
+
+.rules-header.difficult {
+  border-color: var(--accent-purple);
+}
+
+.coming-soon {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.modal-footer {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--bg-input);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Mobile specific help icon adjustment */
+@media (max-width: 768px) {
+  .help-icon {
+    top: 5px;
+    left: 5px;
+    width: 24px;
+    height: 24px;
+    font-size: 0.9rem;
+  }
+}
