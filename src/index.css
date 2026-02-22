@@ -4,22 +4,23 @@
    CSS Variables / Design Tokens
    ============================================= */
 :root {
-  /* Colors - Dark Mode (Default) */
-  --bg-primary: #0f1117;
-  --bg-secondary: #1a1d28;
-  --bg-card: #22263a;
-  --bg-input: #2c3150;
-  --text-primary: #e8eaf0;
-  --text-secondary: #9ba3bf;
-  --text-muted: #5c6380;
-  --accent-blue: #6c8cff;
-  --accent-purple: #a27bff;
-  --accent-green: #4ce0a5;
+  /* Colors - Dark Mode (Arctic Reflection) */
+  --bg-primary: #1a2a33;
+  /* Deeper version of #243C4C */
+  --bg-secondary: #243C4C;
+  --bg-card: #2d4454;
+  --bg-input: #385569;
+  --text-primary: #F4FCFB;
+  --text-secondary: #ACBCBF;
+  --text-muted: #698696;
+  --accent-blue: #5289AD;
+  --accent-purple: #7da0b8;
+  --accent-green: #4ce0b3;
   --accent-red: #ff6b7a;
   --accent-orange: #ffb347;
-  --gradient-main: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
-  --shadow-glow: 0 0 10px rgba(108, 140, 255, 0.15);
+  --gradient-main: linear-gradient(135deg, #5289AD, #698696);
+  --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 10px rgba(82, 137, 173, 0.2);
 
   /* Typography */
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
