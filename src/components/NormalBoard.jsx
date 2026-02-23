@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
  */
 function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRefs }) {
     const { t } = useTranslation();
+    const [showOpSelector, setShowOpSelector] = React.useState(false);
+
     if (!answer) return <div className="normal-cell">{t('game.loading', 'Cargando...')}</div>;
     const isCorrect = answer.status === 'correct';
     const isWrong = answer.status === 'wrong';
@@ -14,8 +16,16 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
         onAnswerChange(field, e.target.value);
     };
 
+    const handleOpSelect = (op) => {
+        onAnswerChange('op', op);
+        setShowOpSelector(false);
+    };
+
     return (
-        <div className={`normal-cell ${isCorrect ? 'pair-correct' : ''} ${isWrong ? 'pair-wrong' : ''}`}>
+        <div
+            className={`normal-cell ${isCorrect ? 'pair-correct' : ''} ${isWrong ? 'pair-wrong' : ''}`}
+            onMouseLeave={() => setShowOpSelector(false)}
+        >
             <div className="task-header">
                 <span className="task-value">{task.value}</span>
             </div>
@@ -32,17 +42,37 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
                     disabled={isCorrect}
                 />
 
-                <input
-                    ref={(el) => (inputRefs.current[cellIdx * 3 + 1] = el)}
-                    type="text"
-                    className="op-input"
-                    placeholder="+/x"
-                    value={answer.op === '*' ? 'x' : (answer.op || '')}
-                    onChange={(e) => handleInput('op', e)}
-                    onKeyDown={(e) => onKeyDown(e, cellIdx, 1)}
-                    disabled={isCorrect}
-                    maxLength={1}
-                />
+                <div className="op-input-wrapper">
+                    <input
+                        ref={(el) => (inputRefs.current[cellIdx * 3 + 1] = el)}
+                        type="text"
+                        className="op-input"
+                        placeholder="+/x"
+                        value={answer.op === '*' ? 'x' : (answer.op || '')}
+                        onChange={(e) => handleInput('op', e)}
+                        onKeyDown={(e) => onKeyDown(e, cellIdx, 1)}
+                        onFocus={() => !isCorrect && setShowOpSelector(true)}
+                        onClick={() => !isCorrect && setShowOpSelector(true)}
+                        disabled={isCorrect}
+                        maxLength={1}
+                        readOnly={false}
+                    />
+
+                    {showOpSelector && !isCorrect && (
+                        <div className="op-selector-tooltip">
+                            <button
+                                className={`op-btn ${answer.op === '+' ? 'active' : ''}`}
+                                onClick={() => handleOpSelect('+')}
+                                type="button"
+                            >+</button>
+                            <button
+                                className={`op-btn ${answer.op === '*' || answer.op === 'x' ? 'active' : ''}`}
+                                onClick={() => handleOpSelect('*')}
+                                type="button"
+                            >x</button>
+                        </div>
+                    )}
+                </div>
 
                 <input
                     ref={(el) => (inputRefs.current[cellIdx * 3 + 2] = el)}

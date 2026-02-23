@@ -36,13 +36,23 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers,
         return items;
     }, [sortedNumbers, visibleIndices, usedNumbers]);
 
+    // 1.5. Map hidden indices to letters a-h
+    const hiddenIndices = sortedNumbers
+        .map((_, i) => i)
+        .filter(i => !visibleIndices.has(i));
+
+    const indexToLetter = {};
+    hiddenIndices.forEach((idx, i) => {
+        indexToLetter[idx] = String.fromCharCode(97 + i); // 97 is 'a'
+    });
+
     return (
         <section className="number-list-section">
             <h2 className="section-label">{t('board.numeros_disponibles')}</h2>
             <div className={`number-list ${className}`}>
-                {displayItems.map((item) => {
+                {displayItems.map((item, i) => {
                     let className = 'number-slot';
-                    let displayValue = '?';
+                    let displayValue = '';
 
                     if (item.originalType === 'visible') {
                         className += ' visible';
@@ -51,11 +61,11 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers,
                     } else {
                         // hidden slot
                         if (item.claimed) {
-                            className += ' revealed-slot'; // We'll add this class to CSS
+                            className += ' revealed-slot';
                             displayValue = item.value;
                         } else {
                             className += ' hidden-slot';
-                            displayValue = '?';
+                            displayValue = indexToLetter[i] || '?';
                         }
                     }
 
