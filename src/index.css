@@ -263,8 +263,16 @@ body {
 }
 
 /* =============================================
-   Section Labels
+   Section Labels & Headers
    ============================================= */
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: var(--gap-xs);
+}
+
 .section-label {
   font-family: var(--font-display);
   font-size: 0.85rem;
@@ -273,6 +281,18 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: var(--gap-xs);
+}
+
+.section-label.no-margin {
+  margin-bottom: 0;
+}
+
+.header-counters {
+  display: flex;
+  gap: var(--gap-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
 .game-title {
@@ -294,6 +314,26 @@ body {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: var(--gap-sm);
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Very Easy (mini): 2×2 layout */
+.mode-very-easy .board-grid {
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 440px;
+}
+
+.mode-very-easy .number-list {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.mode-very-easy .section-header-row {
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .pair-column {
@@ -421,28 +461,69 @@ body {
    Number List
    ============================================= */
 .number-list-section {
-  padding: var(--gap-xs) 0;
+  padding: var(--gap-sm) 0;
   flex-shrink: 0;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: var(--gap-xs);
 }
 
 .number-list {
   display: grid;
-  grid-template-columns: repeat(16, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: var(--gap-xs);
   width: 100%;
+  max-width: 600px;
+  justify-content: center;
 }
 
-/* Large monitors: 2 rows of 8 only for Easy Mode */
+/* 2 equal rows of 4 for mini/fast */
+.number-list.grid-mini {
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 400px;
+}
+
+/* User fix: Compact numbers list (used in mini/fast web & mobile) */
+.number-list-compact .number-slot {
+  height: 32px;
+  font-size: 0.8rem;
+  padding: 0;
+}
+
+.number-list-compact .usage-indicator {
+  width: 12px;
+  height: 12px;
+  font-size: 0.6rem;
+  bottom: -4px;
+}
+
+/* Large monitors: specific centering */
 @media (min-width: 1400px) {
-  .mode-easy .number-list {
-    grid-template-columns: repeat(8, 11%) !important;
-    /* Fixed width columns to prevent stretching */
-    justify-content: center;
+  .number-list {
     max-width: 640px;
-    margin: 0 auto;
     gap: 8px !important;
   }
+}
+
+/* Constrain game content to same max-width in all modes */
+.mode-normal .game-main,
+.mode-rapido .game-main,
+.mode-easy .game-main,
+.mode-very-easy .game-main {
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
 }
 
 .number-slot {
@@ -456,6 +537,57 @@ body {
   font-weight: 600;
   border-radius: var(--radius-sm);
   transition: transform var(--transition-fast);
+  position: relative;
+  cursor: pointer;
+}
+
+.usage-indicators {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: -2px;
+  /* Slight overlap */
+  pointer-events: none;
+  z-index: 5;
+}
+
+.usage-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1.5px solid var(--accent-blue);
+  color: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  line-height: 1;
+  transition: all var(--transition-fast);
+}
+
+.usage-indicator.prod {
+  border-color: var(--accent-orange);
+  color: var(--accent-orange);
+}
+
+.usage-indicator.sum {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+/* Light mode adjustments */
+.light-mode .usage-indicator {
+  background: #fff;
+}
+
+/* Hover effects */
+.number-slot:hover .usage-indicator {
+  transform: scale(1.1);
 }
 
 .number-slot.visible {
@@ -501,7 +633,7 @@ body {
   flex-direction: column;
   gap: var(--gap-sm);
   min-height: 0;
-  overflow-y: auto;
+  overflow-y: visible;
   padding-right: 4px;
 }
 
@@ -509,6 +641,26 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
+}
+
+/* Fast mode (Rapido): 3-3-2 layout */
+.mode-rapido .normal-grid {
+  grid-template-columns: repeat(6, 1fr);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.mode-rapido .normal-grid .normal-cell {
+  grid-column: span 2;
+}
+
+/* Centering the last row (2 items) in a 3-column (grid-6) layout */
+.mode-rapido .normal-grid .normal-cell:nth-child(7) {
+  grid-column: 2 / span 2;
+}
+
+.mode-rapido .normal-grid .normal-cell:nth-child(8) {
+  grid-column: 4 / span 2;
 }
 
 .normal-cell {
@@ -893,13 +1045,25 @@ body {
     width: 100% !important;
     flex: none !important;
     display: grid !important;
-    grid-template-columns: repeat(6, 1fr) !important;
-    gap: 3px !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
   }
 
   .mobile-list-compact .number-slot {
-    height: 24px !important;
-    font-size: 0.65rem !important;
+    height: 32px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Improved vertical spacing for Mini mode mobile */
+  .mode-very-easy.app-container {
+    padding-top: var(--gap-lg);
+    justify-content: space-around;
+  }
+
+  .mode-very-easy .game-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .side-counters {
@@ -984,6 +1148,11 @@ body {
     padding: 2px;
   }
 
+  /* Force 2 columns for Very Easy (mini) on mobile */
+  .mode-very-easy .board-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
   .normal-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 4px;
@@ -993,6 +1162,19 @@ body {
     overflow-y: auto;
     /* Allow scrolling if it still overflows slightly */
     padding: 2px;
+  }
+
+
+  /* Fast (Rapido) Board: Clean 2 columns (Reset web 3-3-2 overrides) */
+  .mode-rapido .normal-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    max-width: 100% !important;
+  }
+
+  .mode-rapido .normal-grid .normal-cell,
+  .mode-rapido .normal-grid .normal-cell:nth-child(7),
+  .mode-rapido .normal-grid .normal-cell:nth-child(8) {
+    grid-column: span 1 !important;
   }
 
   .pair-column,

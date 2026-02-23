@@ -12,6 +12,8 @@ const resources = {
                 "solved": "ok!",
                 "mode": "Mode:",
                 "easy": "easy",
+                "very_easy": "mini",
+                "rapido": "fast",
                 "normal": "normal",
                 "hard": "hard"
             },
@@ -61,6 +63,8 @@ const resources = {
                 "solved": "¡ok!",
                 "mode": "Modo:",
                 "easy": "fácil",
+                "very_easy": "mini",
+                "rapido": "rápido",
                 "normal": "normal",
                 "hard": "difícil"
             },

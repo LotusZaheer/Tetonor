@@ -201,16 +201,20 @@ const WheelPicker = ({ options, onSelect, onCancel, currentValue, t, letter }) =
  * Keeps exactly 16 slots. Hidden slots are revealed only when 
  * they match a number used in a correct pair.
  */
-export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers, guessedValues, setGuessedValues, className = "" }) {
+export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers, guessedValues, setGuessedValues, className = "", remainingSums, remainingProds, sumLimit, prodLimit }) {
     const { t } = useTranslation();
     const [openSlotIdx, setOpenSlotIdx] = useState(null);
 
     const displayItems = useMemo(() => {
+        const { sumUsed = [], prodUsed = [], claimed = [] } = usedNumbers || {};
+
         // 1. Initialize slots from sorted numbers
         const items = sortedNumbers.map((num, i) => ({
             value: num,
             originalType: visibleIndices.has(i) ? 'visible' : 'hidden',
             claimed: false,
+            usedInSum: false,
+            usedInProduct: false,
             key: `slot-${i}`,
         }));
 
@@ -221,14 +225,29 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers,
             }
         });
 
-        if (!usedNumbers || usedNumbers.length === 0) return items;
-
         // 3. Claim slots for used numbers (correctly solved)
-        const sortedUsed = [...usedNumbers].sort((a, b) => a - b);
-        sortedUsed.forEach((val) => {
+        const sortedClaimed = [...claimed].sort((a, b) => a - b);
+        sortedClaimed.forEach((val) => {
             const slot = items.find((item) => item.value === val && !item.claimed);
             if (slot) {
                 slot.claimed = true;
+            }
+        });
+
+        // 4. Mark sum and product usage
+        const sortedSumUsed = [...sumUsed].sort((a, b) => a - b);
+        sortedSumUsed.forEach((val) => {
+            const slot = items.find((item) => item.value === val && !item.usedInSum);
+            if (slot) {
+                slot.usedInSum = true;
+            }
+        });
+
+        const sortedProdUsed = [...prodUsed].sort((a, b) => a - b);
+        sortedProdUsed.forEach((val) => {
+            const slot = items.find((item) => item.value === val && !item.usedInProduct);
+            if (slot) {
+                slot.usedInProduct = true;
             }
         });
 
@@ -295,7 +314,15 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers,
 
     return (
         <section className="number-list-section">
-            <h2 className="section-label">{t('board.numeros_disponibles')}</h2>
+            <div className={`section-header-row ${remainingSums !== undefined ? 'with-counters' : ''}`}>
+                <h2 className="section-label no-margin">{t('board.numeros_disponibles')}</h2>
+                {(remainingSums !== undefined && remainingProds !== undefined) && (
+                    <div className="header-counters desktop-only">
+                        <span>+: <span className={`counter-val ${remainingSums === 0 ? 'text-red' : ''}`}>{remainingSums}/{sumLimit || 8}</span></span>
+                        <span>x: <span className={`counter-val ${remainingProds === 0 ? 'text-red' : ''}`}>{remainingProds}/{prodLimit || 8}</span></span>
+                    </div>
+                )}
+            </div>
             <div className={`number-list ${className}`}>
                 {displayItems.map((item, i) => {
                     let slotClass = 'number-slot';
@@ -337,6 +364,11 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers,
                             onDragStart={(e) => handleDragStart(e, draggableValue, draggableLetter)}
                         >
                             {displayValue}
+
+                            <div className="usage-indicators">
+                                {item.usedInProduct && <span className="usage-indicator prod">×</span>}
+                                {item.usedInSum && <span className="usage-indicator sum">+</span>}
+                            </div>
 
                             {openSlotIdx === i && (
                                 <WheelPicker

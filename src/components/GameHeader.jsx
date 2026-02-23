@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 export default function GameHeader({ onNewGame, isSolved, currentMode, onSetMode }) {
     const { t } = useTranslation();
     const modes = [
+        { id: 'very_easy', label: t('game.very_easy') },
         { id: 'easy', label: t('game.easy') },
+        { id: 'rapido', label: t('game.rapido') },
         { id: 'normal', label: t('game.normal') },
         { id: 'hard', label: t('game.hard') },
     ];

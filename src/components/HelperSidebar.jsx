@@ -45,17 +45,6 @@ export default function HelperSidebar({ answers, tasks, isWeb }) {
 
     return (
         <aside className="helper-sidebar">
-            <section className="sidebar-section desktop-only">
-                <h3 className="section-title">{t('sidebar.available_ops')}</h3>
-                <div className="counter-item">
-                    <span>{t('sidebar.sums_available')}</span>
-                    <span className={`counter-val ${remainingSums === 0 ? 'text-red' : ''}`}>{remainingSums}/8</span>
-                </div>
-                <div className="counter-item">
-                    <span>{t('sidebar.prods_available')}</span>
-                    <span className={`counter-val ${remainingProds === 0 ? 'text-red' : ''}`}>{remainingProds}/8</span>
-                </div>
-            </section>
 
             {!isWeb && (
                 <section className="sidebar-section">

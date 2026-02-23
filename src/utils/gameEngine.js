@@ -68,6 +68,49 @@ export function generatePuzzle() {
 }
 
 /**
+ * Generates a smaller Tetonor puzzle for Very Easy mode.
+ * 4 pairs, 8 numbers total, half visible, half hidden.
+ */
+export function generateMiniPuzzle() {
+    // 1. Generate 8 random numbers (1 - 99, may repeat)
+    const numbers = Array.from({ length: 8 }, () => randomInt(1, 99));
+
+    // 2. Shuffle and pair them into 4 pairs
+    const shuffledNumbers = shuffle(numbers);
+    const pairs = [];
+    for (let i = 0; i < 8; i += 2) {
+        const a = shuffledNumbers[i];
+        const b = shuffledNumbers[i + 1];
+        pairs.push({ a, b, sum: a + b, product: a * b });
+    }
+
+    // 3. Sort all 8 numbers
+    const sortedNumbers = [...numbers].sort((x, y) => x - y);
+
+    // 4. Pick 4 random indices to show, 4 to hide
+    const indices = Array.from({ length: 8 }, (_, i) => i);
+    const shuffledIndices = shuffle(indices);
+    const visibleIndices = new Set(shuffledIndices.slice(0, 4));
+    const hiddenIndices = new Set(shuffledIndices.slice(4));
+
+    // 5. Create 8 normal tasks (4 sums, 4 products)
+    const normalTasks = [];
+    pairs.forEach((p) => {
+        normalTasks.push({ value: p.sum, op: '+', pair: p });
+        normalTasks.push({ value: p.product, op: 'x', pair: p });
+    });
+    shuffle(normalTasks);
+
+    return {
+        pairs,
+        normalTasks,
+        sortedNumbers,
+        visibleIndices,
+        hiddenIndices,
+    };
+}
+
+/**
  * Validates a single task (result, num1, op, num2).
  * op can be '+' or '*' (also translates 'x' to '*')
  */

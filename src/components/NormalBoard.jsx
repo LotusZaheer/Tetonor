@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 /**
  * Single cell for the Normal board.
  */
-function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRefs, guessedValues, puzzle, sumCount, prodCount }) {
+function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRefs, guessedValues, puzzle, sumCount, prodCount, sumLimit, prodLimit }) {
     const { t } = useTranslation();
     const [showOpSelector, setShowOpSelector] = React.useState(false);
     const [dragOverField, setDragOverField] = React.useState(null); // 'num1' or 'num2'
@@ -47,8 +47,8 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
             const currentIsSum = answer.op === '+';
             const currentIsProd = answer.op === '*' || answer.op === 'x';
 
-            if (isSum && sumCount >= 8 && !currentIsSum) return;
-            if (isProd && prodCount >= 8 && !currentIsProd) return;
+            if (isSum && sumCount >= sumLimit && !currentIsSum) return;
+            if (isProd && prodCount >= prodLimit && !currentIsProd) return;
 
             onAnswerChange('op', op);
             return;
@@ -79,8 +79,8 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
     const isGuessed2 = /^[a-h]$/.test(answer.num2) && guessedValues;
 
     // Determine if operators are disabled
-    const plusDisabled = sumCount >= 8 && answer.op !== '+';
-    const multDisabled = prodCount >= 8 && (answer.op !== '*' && answer.op !== 'x');
+    const plusDisabled = sumCount >= sumLimit && answer.op !== '+';
+    const multDisabled = prodCount >= sumLimit && (answer.op !== '*' && answer.op !== 'x');
 
     return (
         <div
@@ -105,41 +105,33 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
                     onDragLeave={() => setDragOverField(null)}
                     disabled={isCorrect}
                 />
-
-                <div className="op-input-wrapper">
-                    <input
-                        ref={(el) => (inputRefs.current[cellIdx * 3 + 1] = el)}
-                        type="text"
-                        className="op-input"
-                        placeholder="+/x"
-                        value={answer.op === '*' ? 'x' : (answer.op || '')}
-                        onKeyDown={handleOpKeyDown}
-                        onChange={() => { }} // Managed via onKeyDown for direct replace
-                        onFocus={() => !isCorrect && setShowOpSelector(true)}
-                        onClick={() => !isCorrect && setShowOpSelector(true)}
-                        disabled={isCorrect}
-                        maxLength={1}
-                        readOnly={false}
-                    />
-
-                    {showOpSelector && !isCorrect && (
-                        <div className="op-selector-tooltip">
+                <button
+                    ref={(el) => (inputRefs.current[cellIdx * 3 + 1] = el)}
+                    className={`op-btn ${answer.op === '*' ? 'prod' : answer.op === '+' ? 'sum' : ''}`}
+                    onClick={() => !isCorrect && setShowOpSelector(!showOpSelector)}
+                    onKeyDown={handleOpKeyDown}
+                    disabled={isCorrect}
+                >
+                    {answer.op === '*' ? '×' : answer.op || '?'}
+                    {showOpSelector && (
+                        <div className="op-selector">
                             <button
-                                className={`op-btn ${answer.op === '+' ? 'active' : ''}`}
-                                onClick={() => !plusDisabled && handleOpSelect('+')}
+                                className="op-option sum"
+                                onClick={(e) => { e.stopPropagation(); handleOpSelect('+'); }}
                                 disabled={plusDisabled}
-                                type="button"
-                            >+</button>
+                            >
+                                +
+                            </button>
                             <button
-                                className={`op-btn ${answer.op === '*' || answer.op === 'x' ? 'active' : ''}`}
-                                onClick={() => !multDisabled && handleOpSelect('*')}
+                                className="op-option prod"
+                                onClick={(e) => { e.stopPropagation(); handleOpSelect('*'); }}
                                 disabled={multDisabled}
-                                type="button"
-                            >x</button>
+                            >
+                                ×
+                            </button>
                         </div>
                     )}
-                </div>
-
+                </button>
                 <input
                     ref={(el) => (inputRefs.current[cellIdx * 3 + 2] = el)}
                     type="text"
@@ -158,11 +150,10 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
     );
 }
 
-export default function NormalBoard({ tasks, answers, onAnswerChange, guessedValues, puzzle }) {
+export default function NormalBoard({ tasks, answers, onAnswerChange, guessedValues, puzzle, sumLimit = 8, prodLimit = 8 }) {
     const { t } = useTranslation();
     const inputRefs = useRef([]);
 
-    // Calculate usage for the whole board
     const sumCount = answers.filter(a => a.op === '+').length;
     const prodCount = answers.filter(a => (a.op === '*' || a.op === 'x')).length;
 
@@ -191,10 +182,13 @@ export default function NormalBoard({ tasks, answers, onAnswerChange, guessedVal
         }
     };
 
+    const isCompact = tasks.length === 8;
+    const gridTitle = isCompact ? " (3-3-2)" : " (4x4)";
+
     return (
         <div className="normal-board">
-            <h2 className="section-label">{t('board.operaciones')} (4x4)</h2>
-            <div className="normal-grid">
+            <h2 className="section-label">{t('board.operaciones')}{gridTitle}</h2>
+            <div className={`normal-grid ${isCompact ? 'compact' : ''}`}>
                 {tasks.map((task, idx) => (
                     <NormalCell
                         key={idx}
@@ -208,6 +202,8 @@ export default function NormalBoard({ tasks, answers, onAnswerChange, guessedVal
                         puzzle={puzzle}
                         sumCount={sumCount}
                         prodCount={prodCount}
+                        sumLimit={sumLimit}
+                        prodLimit={prodLimit}
                     />
                 ))}
             </div>

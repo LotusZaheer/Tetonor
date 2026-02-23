@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { generatePuzzle, checkPairAnswer, checkTask } from './utils/gameEngine';
+import { generatePuzzle, generateMiniPuzzle, checkPairAnswer, checkTask } from './utils/gameEngine';
 import GameHeader from './components/GameHeader';
 import Board from './components/Board';
 import NumberList from './components/NumberList';
@@ -24,15 +24,15 @@ export default function App() {
   const [puzzle, setPuzzle] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [isSolved, setIsSolved] = useState(false);
-  const [mode, setMode] = useState('normal');
+  const [mode, setMode] = useState('rapido');
   const [showRules, setShowRules] = useState(false);
   const [guessedValues, setGuessedValues] = useState({}); // { [slotIdx]: number }
 
   const startNewGame = useCallback(() => {
-    const p = generatePuzzle();
+    const p = (mode === 'very_easy' || mode === 'rapido') ? generateMiniPuzzle() : generatePuzzle();
     setPuzzle(p);
-    const count = mode === 'easy' ? p.pairs.length : p.normalTasks.length;
-    setAnswers(createInitialAnswers(count, mode === 'normal'));
+    const count = (mode === 'easy' || mode === 'very_easy') ? p.pairs.length : p.normalTasks.length;
+    setAnswers(createInitialAnswers(count, mode === 'normal' || mode === 'rapido'));
     setGuessedValues({});
     setIsSolved(false);
   }, [mode]);
@@ -48,7 +48,6 @@ export default function App() {
 
       const resolveValue = (v) => {
         if (/^[a-h]$/.test(v)) {
-          // Find index of letter
           const hiddenIndices = puzzle.sortedNumbers
             .map((_, i) => i)
             .filter(i => !puzzle.visibleIndices.has(i));
@@ -106,7 +105,10 @@ export default function App() {
   };
 
   const usedNumbers = useMemo(() => {
-    const nums = [];
+    const sumUsed = [];
+    const prodUsed = [];
+    const claimed = [];
+
     answers.forEach((ans) => {
       if (ans.status === 'correct') {
         const resolveValue = (v) => {
@@ -121,12 +123,25 @@ export default function App() {
         };
         const n1 = resolveValue(ans.num1);
         const n2 = resolveValue(ans.num2);
-        if (!isNaN(n1)) nums.push(n1);
-        if (!isNaN(n2)) nums.push(n2);
+
+        if (mode === 'easy' || mode === 'very_easy') {
+          if (!isNaN(n1)) { sumUsed.push(n1); prodUsed.push(n1); claimed.push(n1); }
+          if (!isNaN(n2)) { sumUsed.push(n2); prodUsed.push(n2); claimed.push(n2); }
+        } else {
+          const isSum = ans.op === '+';
+          if (!isNaN(n1)) {
+            if (isSum) sumUsed.push(n1); else prodUsed.push(n1);
+            claimed.push(n1);
+          }
+          if (!isNaN(n2)) {
+            if (isSum) sumUsed.push(n2); else prodUsed.push(n2);
+            claimed.push(n2);
+          }
+        }
       }
     });
-    return nums;
-  }, [answers, guessedValues, puzzle]);
+    return { sumUsed, prodUsed, claimed };
+  }, [answers, guessedValues, puzzle, mode]);
 
   const renderContent = () => {
     if (mode === 'hard') {
@@ -144,7 +159,7 @@ export default function App() {
 
     if (!puzzle) return null;
 
-    const requiredAnswers = mode === 'easy' ? puzzle.pairs.length : puzzle.normalTasks.length;
+    const requiredAnswers = (mode === 'easy' || mode === 'very_easy') ? puzzle.pairs.length : puzzle.normalTasks.length;
     if (answers.length !== requiredAnswers) {
       return (
         <div className="placeholder-container">
@@ -153,56 +168,100 @@ export default function App() {
       );
     }
 
-    const sumCount = answers.filter(a => a.status === 'correct' && a.op === '+').length;
-    const prodCount = answers.filter(a => a.status === 'correct' && (a.op === '*' || a.op === 'x')).length;
-    const remainingSums = Math.max(0, 8 - sumCount);
-    const remainingProds = Math.max(0, 8 - prodCount);
+    const isRapido = mode === 'rapido';
+    const limit = isRapido ? 4 : 8;
+    const sumCount = answers.filter(a => a.op === '+').length;
+    const prodCount = answers.filter(a => (a.op === '*' || a.op === 'x')).length;
+    const remainingSums = Math.max(0, limit - sumCount);
+    const remainingProds = Math.max(0, limit - prodCount);
 
-    if (mode === 'normal') {
+    if (mode === 'normal' || mode === 'rapido') {
       return (
-        <div className="normal-layout">
-          <div className="layout-left">
-            <NormalBoard
-              tasks={puzzle.normalTasks}
-              answers={answers}
-              onAnswerChange={handleNormalAnswerChange}
+        <>
+          <NormalBoard
+            tasks={puzzle.normalTasks}
+            answers={answers}
+            onAnswerChange={handleNormalAnswerChange}
+            guessedValues={guessedValues}
+            puzzle={puzzle}
+            sumCount={sumCount}
+            prodCount={prodCount}
+            sumLimit={limit}
+            prodLimit={limit}
+          />
+          <div className="mobile-only mobile-numbers-wrapper">
+            <NumberList
+              sortedNumbers={puzzle.sortedNumbers}
+              visibleIndices={puzzle.visibleIndices}
+              usedNumbers={usedNumbers}
               guessedValues={guessedValues}
-              puzzle={puzzle}
+              setGuessedValues={setGuessedValues}
+              className="mobile-list-compact"
+              remainingSums={remainingSums}
+              remainingProds={remainingProds}
+              sumLimit={limit}
+              prodLimit={limit}
             />
-            <div className="mobile-only mobile-numbers-wrapper">
-              <NumberList
-                sortedNumbers={puzzle.sortedNumbers}
-                visibleIndices={puzzle.visibleIndices}
-                usedNumbers={usedNumbers}
-                guessedValues={guessedValues}
-                setGuessedValues={setGuessedValues}
-                className="mobile-list-compact"
-              />
-              <div className="mobile-counters-box side-counters">
-                <h3 className="section-title small">{t('board.operaciones')}</h3>
-                <div className="mobile-counter-text vertical">
-                  <span>+: {remainingSums}/8</span>
-                  <span>x: {remainingProds}/8</span>
-                </div>
+            <div className="mobile-counters-box side-counters">
+              <h3 className="section-title small">{t('board.operaciones')}</h3>
+              <div className="mobile-counter-text vertical">
+                <span>+: <span className={`counter-val ${remainingSums === 0 ? 'text-red' : ''}`}>{remainingSums}/{limit}</span></span>
+                <span>x: <span className={`counter-val ${remainingProds === 0 ? 'text-red' : ''}`}>{remainingProds}/{limit}</span></span>
               </div>
             </div>
-
-            <div className="desktop-only">
-              <NumberList
-                sortedNumbers={puzzle.sortedNumbers}
-                visibleIndices={puzzle.visibleIndices}
-                usedNumbers={usedNumbers}
-                guessedValues={guessedValues}
-                setGuessedValues={setGuessedValues}
-              />
-            </div>
           </div>
-          <HelperSidebar
+
+          <div className="desktop-only">
+            <NumberList
+              sortedNumbers={puzzle.sortedNumbers}
+              visibleIndices={puzzle.visibleIndices}
+              usedNumbers={usedNumbers}
+              guessedValues={guessedValues}
+              setGuessedValues={setGuessedValues}
+              className={isRapido ? "number-list-compact grid-mini" : ""}
+              remainingSums={remainingSums}
+              remainingProds={remainingProds}
+              sumLimit={limit}
+              prodLimit={limit}
+            />
+          </div>
+        </>
+      );
+    }
+
+    if (mode === 'very_easy') {
+      return (
+        <>
+          <Board
+            pairs={puzzle.pairs}
             answers={answers}
-            tasks={puzzle.normalTasks}
-            isWeb={true}
+            onAnswerChange={handleEasyAnswerChange}
+            guessedValues={guessedValues}
+            puzzle={puzzle}
           />
-        </div>
+
+          <div className="mobile-only mobile-numbers-wrapper">
+            <NumberList
+              sortedNumbers={puzzle.sortedNumbers}
+              visibleIndices={puzzle.visibleIndices}
+              usedNumbers={usedNumbers}
+              guessedValues={guessedValues}
+              setGuessedValues={setGuessedValues}
+              className="mobile-list-compact"
+            />
+          </div>
+
+          <div className="desktop-only">
+            <NumberList
+              sortedNumbers={puzzle.sortedNumbers}
+              visibleIndices={puzzle.visibleIndices}
+              usedNumbers={usedNumbers}
+              guessedValues={guessedValues}
+              setGuessedValues={setGuessedValues}
+              className="number-list-compact grid-mini"
+            />
+          </div>
+        </>
       );
     }
 
@@ -227,7 +286,7 @@ export default function App() {
   };
 
   return (
-    <div className={`app-container mode-${mode}`}>
+    <div className={`app-container mode-${mode.replace('_', '-')}`}>
       <ThemeToggle />
       <button
         className="help-icon"
