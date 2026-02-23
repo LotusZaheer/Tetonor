@@ -1389,3 +1389,205 @@ input:checked+.slider-wrapper .rays {
 .lang-btn:hover:not(.active) {
   color: var(--text-primary);
 }
+
+/* NumberList Tooltip & Guessed Slots */
+.guessed-slot {
+  background: var(--bg-card);
+  color: var(--accent-orange);
+  border: 2px dashed var(--accent-orange);
+  font-style: italic;
+  font-weight: 700;
+  cursor: grab;
+}
+
+/* WheelPicker Overlay & Responsive Containers */
+.wheel-picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fade-in 0.2s ease;
+}
+
+.wheel-picker-container {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-orange);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 179, 71, 0.1);
+  width: 220px;
+  max-width: 90vw;
+  padding: var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  animation: picker-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes picker-slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Wheel Viewport & List */
+.wheel-viewport {
+  position: relative;
+  height: 150px;
+  /* Show exactly 3-5 items */
+  overflow: hidden;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.wheel-highlight-bar {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  transform: translateY(-50%);
+  background: rgba(255, 179, 71, 0.1);
+  border-top: 1px solid rgba(255, 179, 71, 0.2);
+  border-bottom: 1px solid rgba(255, 179, 71, 0.2);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.wheel-scroll-list {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  padding: 0;
+  scrollbar-width: none;
+  position: relative;
+  z-index: 1;
+}
+
+.wheel-scroll-list::-webkit-scrollbar {
+  display: none;
+}
+
+.wheel-spacer {
+  height: 55px;
+  /* Offset to allow center-snapping for first/last items */
+}
+
+.wheel-item {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  scroll-snap-align: center;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.wheel-item.active {
+  color: var(--accent-orange);
+  font-size: 1.8rem;
+  transform: scale(1.1);
+  opacity: 1;
+  filter: blur(0);
+}
+
+.wheel-item.neighbor {
+  opacity: 0.4;
+  filter: blur(1.5px);
+  transform: scale(0.9);
+}
+
+/* Actions */
+.wheel-actions {
+  display: flex;
+  gap: var(--gap-md);
+}
+
+.wheel-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-family: var(--font-body);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wheel-btn.confirm {
+  background: var(--gradient-main);
+  color: white;
+}
+
+.wheel-btn.cancel {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+}
+
+.wheel-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+/* Desktop Specific: More ergonomic popover instead of full screen overlay */
+@media (min-width: 1024px) {
+  .wheel-picker-overlay {
+    background: transparent;
+    backdrop-filter: none;
+    pointer-events: none;
+    /* Only the container inside will catch events */
+  }
+
+  .wheel-picker-container {
+    pointer-events: auto;
+    position: fixed;
+    top: 50%;
+    right: 40px;
+    /* Position at the side for ergonomics */
+    transform: translateY(-50%);
+    width: 260px;
+    background: var(--bg-card);
+    border-width: 2px;
+  }
+}
+
+/* Guessed Value Styling in Board */
+.num-input.guessed-value {
+  color: var(--accent-orange) !important;
+  font-style: italic;
+  font-weight: 700;
+  border-bottom-style: dashed;
+}
+
+/* Drag & Drop Feedback */
+.num-input.drag-over {
+  border-color: var(--accent-orange) !important;
+  background: rgba(255, 179, 71, 0.1) !important;
+  transform: scale(1.05);
+}

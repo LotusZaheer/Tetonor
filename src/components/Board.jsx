@@ -1,9 +1,10 @@
 import React, { useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export default function Board({ pairs, answers, onAnswerChange }) {
+export default function Board({ pairs, answers, onAnswerChange, guessedValues, puzzle }) {
     const { t } = useTranslation();
     const inputRefs = useRef([]);
+    const [dragOverIdx, setDragOverIdx] = React.useState(null);
 
     const setRef = useCallback((el, pairIdx, inputIdx) => {
         const flatIdx = pairIdx * 2 + inputIdx;
@@ -17,6 +18,18 @@ export default function Board({ pairs, answers, onAnswerChange }) {
             el.select();
         }
     }, []);
+
+    const getDisplayValue = (v) => {
+        if (!v) return '';
+        if (/^[a-h]$/.test(v)) {
+            const hiddenIndices = puzzle.sortedNumbers
+                .map((_, i) => i)
+                .filter(i => !puzzle.visibleIndices.has(i));
+            const letterIdx = hiddenIndices[v.charCodeAt(0) - 97];
+            return guessedValues[letterIdx] || v;
+        }
+        return v;
+    };
 
     const handleKeyDown = useCallback(
         (e, pairIdx, inputIdx) => {
@@ -60,12 +73,27 @@ export default function Board({ pairs, answers, onAnswerChange }) {
     const handleChange = useCallback(
         (e, pairIdx, field) => {
             const val = e.target.value;
-            if (val === '' || /^\d+$/.test(val)) {
-                onAnswerChange(pairIdx, field, val === '' ? '' : parseInt(val, 10));
+            if (val === '' || /^\d+$/.test(val) || /^[a-h]$/.test(val)) {
+                onAnswerChange(pairIdx, field, val === '' ? '' : (isNaN(val) ? val : parseInt(val, 10)));
             }
         },
         [onAnswerChange]
     );
+
+    const handleDrop = (e, pairIdx, field) => {
+        e.preventDefault();
+        setDragOverIdx(null);
+        const val = e.dataTransfer.getData('text/plain');
+        if (val && (/^\d+$/.test(val) || /^[a-h]$/.test(val))) {
+            const finalVal = isNaN(val) ? val : parseInt(val, 10);
+            onAnswerChange(pairIdx, field, finalVal);
+        }
+    };
+
+    const handleDragOver = (e, idx) => {
+        e.preventDefault();
+        setDragOverIdx(idx);
+    };
 
     return (
         <section className="board-section">
@@ -79,6 +107,9 @@ export default function Board({ pairs, answers, onAnswerChange }) {
                         : ans.status === 'wrong'
                             ? 'pair-wrong'
                             : '';
+
+                    const isGuessed1 = /^[a-h]$/.test(ans.num1) && guessedValues;
+                    const isGuessed2 = /^[a-h]$/.test(ans.num2) && guessedValues;
 
                     return (
                         <div key={pairIdx} className={`pair-column ${statusClass}`}>
@@ -97,11 +128,13 @@ export default function Board({ pairs, answers, onAnswerChange }) {
                                     ref={(el) => setRef(el, pairIdx, 0)}
                                     type="text"
                                     inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    className="num-input"
-                                    value={ans.num1 === '' || ans.num1 === null ? '' : ans.num1}
+                                    className={`num-input ${dragOverIdx === pairIdx * 2 ? 'drag-over' : ''} ${isGuessed1 ? 'guessed-value' : ''}`}
+                                    value={getDisplayValue(ans.num1)}
                                     onChange={(e) => handleChange(e, pairIdx, 'num1')}
                                     onKeyDown={(e) => handleKeyDown(e, pairIdx, 0)}
+                                    onDrop={(e) => handleDrop(e, pairIdx, 'num1')}
+                                    onDragOver={(e) => handleDragOver(e, pairIdx * 2)}
+                                    onDragLeave={() => setDragOverIdx(null)}
                                     placeholder="?"
                                     disabled={ans.status === 'correct'}
                                     aria-label={t('board.pair_num_1', { num: pairIdx + 1, defaultValue: `Par ${pairIdx + 1}, número 1` })}
@@ -111,11 +144,13 @@ export default function Board({ pairs, answers, onAnswerChange }) {
                                     ref={(el) => setRef(el, pairIdx, 1)}
                                     type="text"
                                     inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    className="num-input"
-                                    value={ans.num2 === '' || ans.num2 === null ? '' : ans.num2}
+                                    className={`num-input ${dragOverIdx === pairIdx * 2 + 1 ? 'drag-over' : ''} ${isGuessed2 ? 'guessed-value' : ''}`}
+                                    value={getDisplayValue(ans.num2)}
                                     onChange={(e) => handleChange(e, pairIdx, 'num2')}
                                     onKeyDown={(e) => handleKeyDown(e, pairIdx, 1)}
+                                    onDrop={(e) => handleDrop(e, pairIdx, 'num2')}
+                                    onDragOver={(e) => handleDragOver(e, pairIdx * 2 + 1)}
+                                    onDragLeave={() => setDragOverIdx(null)}
                                     placeholder="?"
                                     disabled={ans.status === 'correct'}
                                     aria-label={t('board.pair_num_2', { num: pairIdx + 1, defaultValue: `Par ${pairIdx + 1}, número 2` })}

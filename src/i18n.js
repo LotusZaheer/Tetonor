@@ -44,7 +44,11 @@ const resources = {
                 "empty_hint": "All numbers are balanced!",
                 "and": "and",
                 "missing_prod": "needs product",
-                "missing_sum": "needs sum"
+                "missing_sum": "needs sum",
+                "pick_number": "Select value",
+                "clear_guess": "Clear",
+                "no_options": "No middle values",
+                "variable_title": "Variable {{letter}}"
             }
         }
     },
@@ -89,7 +93,11 @@ const resources = {
                 "empty_hint": "¡Todos los números están balanceados!",
                 "and": "y",
                 "missing_prod": "falta producto",
-                "missing_sum": "falta suma"
+                "missing_sum": "falta suma",
+                "pick_number": "Seleccionar valor",
+                "clear_guess": "Limpiar",
+                "no_options": "Sin valores intermedios",
+                "variable_title": "Variable {{letter}}"
             }
         }
     }

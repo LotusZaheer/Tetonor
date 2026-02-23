@@ -4,13 +4,26 @@ import { useTranslation } from 'react-i18next';
 /**
  * Single cell for the Normal board.
  */
-function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRefs }) {
+function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRefs, guessedValues, puzzle }) {
     const { t } = useTranslation();
     const [showOpSelector, setShowOpSelector] = React.useState(false);
+    const [dragOverField, setDragOverField] = React.useState(null); // 'num1' or 'num2'
 
     if (!answer) return <div className="normal-cell">{t('game.loading', 'Cargando...')}</div>;
     const isCorrect = answer.status === 'correct';
     const isWrong = answer.status === 'wrong';
+
+    const getDisplayValue = (v) => {
+        if (!v) return '';
+        if (/^[a-h]$/.test(v)) {
+            const hiddenIndices = puzzle.sortedNumbers
+                .map((_, i) => i)
+                .filter(i => !puzzle.visibleIndices.has(i));
+            const letterIdx = hiddenIndices[v.charCodeAt(0) - 97];
+            return guessedValues[letterIdx] || v;
+        }
+        return v;
+    };
 
     const handleInput = (field, e) => {
         onAnswerChange(field, e.target.value);
@@ -37,6 +50,24 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
         setShowOpSelector(false);
     };
 
+    const handleDrop = (e, field) => {
+        e.preventDefault();
+        setDragOverField(null);
+        const val = e.dataTransfer.getData('text/plain');
+        if (val && (/^\d+$/.test(val) || /^[a-h]$/.test(val))) {
+            const finalVal = isNaN(val) ? val : parseInt(val, 10);
+            onAnswerChange(field, finalVal);
+        }
+    };
+
+    const handleDragOver = (e, field) => {
+        e.preventDefault();
+        setDragOverField(field);
+    };
+
+    const isGuessed1 = /^[a-h]$/.test(answer.num1) && guessedValues;
+    const isGuessed2 = /^[a-h]$/.test(answer.num2) && guessedValues;
+
     return (
         <div
             className={`normal-cell ${isCorrect ? 'pair-correct' : ''} ${isWrong ? 'pair-wrong' : ''}`}
@@ -50,11 +81,14 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
                 <input
                     ref={(el) => (inputRefs.current[cellIdx * 3] = el)}
                     type="text"
-                    className="num-input small"
+                    className={`num-input small ${dragOverField === 'num1' ? 'drag-over' : ''} ${isGuessed1 ? 'guessed-value' : ''}`}
                     placeholder="?"
-                    value={answer.num1 || ''}
+                    value={getDisplayValue(answer.num1)}
                     onChange={(e) => handleInput('num1', e)}
                     onKeyDown={(e) => onKeyDown(e, cellIdx, 0)}
+                    onDrop={(e) => handleDrop(e, 'num1')}
+                    onDragOver={(e) => handleDragOver(e, 'num1')}
+                    onDragLeave={() => setDragOverField(null)}
                     disabled={isCorrect}
                 />
 
@@ -93,11 +127,14 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
                 <input
                     ref={(el) => (inputRefs.current[cellIdx * 3 + 2] = el)}
                     type="text"
-                    className="num-input small"
+                    className={`num-input small ${dragOverField === 'num2' ? 'drag-over' : ''} ${isGuessed2 ? 'guessed-value' : ''}`}
                     placeholder="?"
-                    value={answer.num2 || ''}
+                    value={getDisplayValue(answer.num2)}
                     onChange={(e) => handleInput('num2', e)}
                     onKeyDown={(e) => onKeyDown(e, cellIdx, 2)}
+                    onDrop={(e) => handleDrop(e, 'num2')}
+                    onDragOver={(e) => handleDragOver(e, 'num2')}
+                    onDragLeave={() => setDragOverField(null)}
                     disabled={isCorrect}
                 />
             </div>
@@ -105,7 +142,7 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
     );
 }
 
-export default function NormalBoard({ tasks, answers, onAnswerChange }) {
+export default function NormalBoard({ tasks, answers, onAnswerChange, guessedValues, puzzle }) {
     const { t } = useTranslation();
     const inputRefs = useRef([]);
 
@@ -147,6 +184,8 @@ export default function NormalBoard({ tasks, answers, onAnswerChange }) {
                         onAnswerChange={(field, val) => onAnswerChange(idx, field, val)}
                         onKeyDown={handleKeyDown}
                         inputRefs={inputRefs}
+                        guessedValues={guessedValues}
+                        puzzle={puzzle}
                     />
                 ))}
             </div>

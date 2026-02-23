@@ -26,12 +26,14 @@ export default function App() {
   const [isSolved, setIsSolved] = useState(false);
   const [mode, setMode] = useState('normal');
   const [showRules, setShowRules] = useState(false);
+  const [guessedValues, setGuessedValues] = useState({}); // { [slotIdx]: number }
 
   const startNewGame = useCallback(() => {
     const p = generatePuzzle();
     setPuzzle(p);
     const count = mode === 'easy' ? p.pairs.length : p.normalTasks.length;
     setAnswers(createInitialAnswers(count, mode === 'normal'));
+    setGuessedValues({});
     setIsSolved(false);
   }, [mode]);
 
@@ -44,9 +46,22 @@ export default function App() {
       const next = [...prev];
       const updatedAns = { ...next[pairIdx], [field]: value, status: null };
 
-      if (updatedAns.num1 && updatedAns.num2) {
-        const n1 = parseInt(updatedAns.num1, 10);
-        const n2 = parseInt(updatedAns.num2, 10);
+      const resolveValue = (v) => {
+        if (/^[a-h]$/.test(v)) {
+          // Find index of letter
+          const hiddenIndices = puzzle.sortedNumbers
+            .map((_, i) => i)
+            .filter(i => !puzzle.visibleIndices.has(i));
+          const letterIdx = hiddenIndices[v.charCodeAt(0) - 97];
+          return guessedValues[letterIdx];
+        }
+        return parseInt(v, 10);
+      };
+
+      const n1 = resolveValue(updatedAns.num1);
+      const n2 = resolveValue(updatedAns.num2);
+
+      if (n1 && n2) {
         const correct = checkPairAnswer(puzzle.pairs[pairIdx], n1, n2);
         updatedAns.status = correct ? 'correct' : 'wrong';
       }
@@ -60,15 +75,26 @@ export default function App() {
   const handleNormalAnswerChange = (idx, field, value) => {
     setAnswers((prev) => {
       const next = [...prev];
-      // Normalize operation: * or x -> *
       let val = value;
       if (field === 'op' && (value === 'x' || value === '*')) val = '*';
 
       const updatedAns = { ...next[idx], [field]: val, status: null };
 
-      if (updatedAns.num1 && updatedAns.num2 && updatedAns.op) {
-        const n1 = parseInt(updatedAns.num1, 10);
-        const n2 = parseInt(updatedAns.num2, 10);
+      const resolveValue = (v) => {
+        if (/^[a-h]$/.test(v)) {
+          const hiddenIndices = puzzle.sortedNumbers
+            .map((_, i) => i)
+            .filter(i => !puzzle.visibleIndices.has(i));
+          const letterIdx = hiddenIndices[v.charCodeAt(0) - 97];
+          return guessedValues[letterIdx];
+        }
+        return parseInt(v, 10);
+      };
+
+      const n1 = resolveValue(updatedAns.num1);
+      const n2 = resolveValue(updatedAns.num2);
+
+      if (n1 && n2 && updatedAns.op) {
         const correct = checkTask(puzzle.normalTasks[idx], n1, n2, updatedAns.op);
         updatedAns.status = correct ? 'correct' : 'wrong';
       }
@@ -83,14 +109,24 @@ export default function App() {
     const nums = [];
     answers.forEach((ans) => {
       if (ans.status === 'correct') {
-        const n1 = parseInt(ans.num1, 10);
-        const n2 = parseInt(ans.num2, 10);
+        const resolveValue = (v) => {
+          if (/^[a-h]$/.test(v)) {
+            const hiddenIndices = puzzle.sortedNumbers
+              .map((_, i) => i)
+              .filter(i => !puzzle.visibleIndices.has(i));
+            const letterIdx = hiddenIndices[v.charCodeAt(0) - 97];
+            return guessedValues[letterIdx];
+          }
+          return parseInt(v, 10);
+        };
+        const n1 = resolveValue(ans.num1);
+        const n2 = resolveValue(ans.num2);
         if (!isNaN(n1)) nums.push(n1);
         if (!isNaN(n2)) nums.push(n2);
       }
     });
     return nums;
-  }, [answers]);
+  }, [answers, guessedValues, puzzle]);
 
   const renderContent = () => {
     if (mode === 'hard') {
@@ -108,8 +144,6 @@ export default function App() {
 
     if (!puzzle) return null;
 
-    // GUARD: Ensure answers array matches the mode's requirement
-    // This prevents crashes during the transitional render when mode changes but answers haven't updated yet.
     const requiredAnswers = mode === 'easy' ? puzzle.pairs.length : puzzle.normalTasks.length;
     if (answers.length !== requiredAnswers) {
       return (
@@ -118,9 +152,7 @@ export default function App() {
         </div>
       );
     }
-    if (!puzzle) return null;
 
-    // Move counters logic here or use a component
     const sumCount = answers.filter(a => a.status === 'correct' && a.op === '+').length;
     const prodCount = answers.filter(a => a.status === 'correct' && (a.op === '*' || a.op === 'x')).length;
     const remainingSums = Math.max(0, 8 - sumCount);
@@ -134,13 +166,16 @@ export default function App() {
               tasks={puzzle.normalTasks}
               answers={answers}
               onAnswerChange={handleNormalAnswerChange}
+              guessedValues={guessedValues}
+              puzzle={puzzle}
             />
-            {/* Mobile Layout: Numbers + Counters on side */}
             <div className="mobile-only mobile-numbers-wrapper">
               <NumberList
                 sortedNumbers={puzzle.sortedNumbers}
                 visibleIndices={puzzle.visibleIndices}
                 usedNumbers={usedNumbers}
+                guessedValues={guessedValues}
+                setGuessedValues={setGuessedValues}
                 className="mobile-list-compact"
               />
               <div className="mobile-counters-box side-counters">
@@ -157,6 +192,8 @@ export default function App() {
                 sortedNumbers={puzzle.sortedNumbers}
                 visibleIndices={puzzle.visibleIndices}
                 usedNumbers={usedNumbers}
+                guessedValues={guessedValues}
+                setGuessedValues={setGuessedValues}
               />
             </div>
           </div>
@@ -175,11 +212,15 @@ export default function App() {
           pairs={puzzle.pairs}
           answers={answers}
           onAnswerChange={handleEasyAnswerChange}
+          guessedValues={guessedValues}
+          puzzle={puzzle}
         />
         <NumberList
           sortedNumbers={puzzle.sortedNumbers}
           visibleIndices={puzzle.visibleIndices}
           usedNumbers={usedNumbers}
+          guessedValues={guessedValues}
+          setGuessedValues={setGuessedValues}
         />
       </>
     );
