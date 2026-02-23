@@ -35,11 +35,16 @@ const resources = {
                 "view_rules": "View Rules"
             },
             "sidebar": {
-                "totals": "TOTALS",
+                "available_ops": "AVAILABLE OPS",
+                "sums_available": "Sums",
+                "prods_available": "Products",
                 "pending": "PENDING NUMBERS",
-                "pending_desc": "Numbers used only once. Find their missing operation!",
-                "sums": "Sums",
-                "products": "Products"
+                "pending_desc": "PENDING PROGRESS",
+                "pending_hint": "Numbers used only once. Find their missing operation!",
+                "empty_hint": "All numbers are balanced!",
+                "and": "and",
+                "missing_prod": "needs product",
+                "missing_sum": "needs sum"
             }
         }
     },
@@ -75,11 +80,16 @@ const resources = {
                 "view_rules": "Ver Reglas"
             },
             "sidebar": {
-                "totals": "TOTALES",
+                "available_ops": "OPS DISPONIBLES",
+                "sums_available": "Sumas",
+                "prods_available": "Productos",
                 "pending": "NÚMEROS PENDIENTES",
-                "pending_desc": "Números usados solo una vez. ¡Busca su operación restante!",
-                "sums": "Sumas",
-                "products": "Productos"
+                "pending_desc": "PROGRESO PENDIENTE",
+                "pending_hint": "Números usados solo una vez. ¡Busca su operación restante!",
+                "empty_hint": "¡Todos los números están balanceados!",
+                "and": "y",
+                "missing_prod": "falta producto",
+                "missing_sum": "falta suma"
             }
         }
     }

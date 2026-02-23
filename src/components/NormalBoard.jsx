@@ -16,6 +16,22 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
         onAnswerChange(field, e.target.value);
     };
 
+    const handleOpKeyDown = (e) => {
+        // Allow navigation keys
+        if (['Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Backspace', 'Delete'].includes(e.key)) {
+            onKeyDown(e, cellIdx, 1);
+            return;
+        }
+
+        const validOps = ['+', '*', 'x', 'X'];
+        if (validOps.includes(e.key)) {
+            e.preventDefault();
+            const op = (e.key === 'x' || e.key === 'X') ? '*' : e.key;
+            onAnswerChange('op', op);
+            return;
+        }
+    };
+
     const handleOpSelect = (op) => {
         onAnswerChange('op', op);
         setShowOpSelector(false);
@@ -49,8 +65,8 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
                         className="op-input"
                         placeholder="+/x"
                         value={answer.op === '*' ? 'x' : (answer.op || '')}
-                        onChange={(e) => handleInput('op', e)}
-                        onKeyDown={(e) => onKeyDown(e, cellIdx, 1)}
+                        onKeyDown={handleOpKeyDown}
+                        onChange={() => { }} // Managed via onKeyDown for direct replace
                         onFocus={() => !isCorrect && setShowOpSelector(true)}
                         onClick={() => !isCorrect && setShowOpSelector(true)}
                         disabled={isCorrect}

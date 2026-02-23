@@ -28,14 +28,14 @@ export default function HelperSidebar({ answers, tasks, isWeb }) {
     const pendingPairs = [];
     answers.forEach((ans, idx) => {
         if (ans.status === 'correct') {
-            const t = tasks[idx];
-            const pairKey = JSON.stringify([...t.target].sort((a, b) => a - b));
+            const currentTask = tasks[idx];
+            const pairKey = JSON.stringify([...currentTask.target].sort((a, b) => a - b));
 
-            if (t.type === '+' && !usedInProd.has(pairKey)) {
-                pendingPairs.push({ pair: t.target, missing: t('sidebar.missing_prod') });
+            if (currentTask.type === '+' && !usedInProd.has(pairKey)) {
+                pendingPairs.push({ pair: currentTask.target, missing: t('sidebar.missing_prod') });
             }
-            if (t.type === '*' && !usedInSum.has(pairKey)) {
-                pendingPairs.push({ pair: t.target, missing: t('sidebar.missing_sum') });
+            if (currentTask.type === '*' && !usedInSum.has(pairKey)) {
+                pendingPairs.push({ pair: currentTask.target, missing: t('sidebar.missing_sum') });
             }
         }
     });

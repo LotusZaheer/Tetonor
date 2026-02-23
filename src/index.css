@@ -4,9 +4,8 @@
    CSS Variables / Design Tokens
    ============================================= */
 :root {
-  /* Colors - Dark Mode (Arctic Reflection) */
+  /* Colors - Dark Mode (Arctic Reflection + Orange Accent) */
   --bg-primary: #1a2a33;
-  /* Deeper version of #243C4C */
   --bg-secondary: #243C4C;
   --bg-card: #2d4454;
   --bg-input: #385569;
@@ -14,13 +13,21 @@
   --text-secondary: #ACBCBF;
   --text-muted: #698696;
   --accent-blue: #5289AD;
+
   --accent-purple: #7da0b8;
   --accent-green: #4ce0b3;
   --accent-red: #ff6b7a;
   --accent-orange: #ffb347;
-  --gradient-main: linear-gradient(135deg, #5289AD, #698696);
+
+  /* Primary Accent in Dark */
+  --gradient-main: linear-gradient(135deg, #ffb347, #ff8e72);
+  --gradient-title: linear-gradient(135deg, #5289AD, #ffb347);
   --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 10px rgba(82, 137, 173, 0.2);
+  --shadow-glow: 0 0 10px rgba(255, 179, 71, 0.2);
+  --task-num-color: var(--text-primary);
+  --op-label-color: var(--accent-orange);
+  --input-focus-color: var(--accent-orange);
+  --accent-active: var(--accent-orange);
 
   /* Typography */
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
@@ -42,7 +49,7 @@
   --transition-normal: 250ms ease;
 }
 
-/* Light Mode - Frozen Mist Theme */
+/* Light Mode - Frozen Mist Theme (Blue Accent) */
 :root.light-mode {
   --bg-primary: #FCF8D8;
   --bg-secondary: #D9DADF;
@@ -51,14 +58,20 @@
   --text-primary: #2D2E2B;
   --text-secondary: #7C7D75;
   --text-muted: #ADACA7;
-  --accent-blue: #DD700B;
-  --accent-purple: #F58723;
+  --accent-blue: #5289AD;
+  /* Primary Accent in Light */
+  --accent-purple: #7da0b8;
   --accent-green: #2dbd86;
   --accent-red: #D64045;
-  --accent-orange: #ff9f4d;
-  --gradient-main: linear-gradient(135deg, #DD700B, #F58723);
-  --shadow-card: 0 4px 12px rgba(124, 125, 117, 0.12);
-  --shadow-glow: 0 0 10px rgba(221, 112, 11, 0.15);
+  --accent-orange: #ffb347;
+  --gradient-main: linear-gradient(135deg, #5289AD, #698696);
+  --gradient-title: linear-gradient(135deg, #5289AD, #ffb347);
+  --shadow-card: 0 4px 12px rgba(82, 137, 173, 0.12);
+  --shadow-glow: 0 0 10px rgba(82, 137, 173, 0.15);
+  --task-num-color: var(--text-primary);
+  --op-label-color: var(--accent-blue);
+  --input-focus-color: var(--accent-orange);
+  --accent-active: var(--accent-blue);
 }
 
 /* =============================================
@@ -163,15 +176,15 @@ body {
 
 .btn-mode.active {
   background: var(--bg-card);
-  color: var(--accent-blue);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: var(--accent-active);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .game-title {
   font-family: var(--font-display);
   font-size: 4rem;
   font-weight: 700;
-  background: var(--gradient-main);
+  background: var(--gradient-title);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -265,7 +278,10 @@ body {
 .game-title {
   font-size: 2.5rem;
   font-weight: 800;
-  color: var(--accent-blue);
+  background: var(--gradient-title);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   letter-spacing: -0.05em;
   line-height: 1;
   margin-bottom: 2px;
@@ -361,14 +377,7 @@ body {
   width: 16px;
   text-align: center;
   flex-shrink: 0;
-}
-
-.sum-cell .op-label {
-  color: var(--accent-blue);
-}
-
-.product-cell .op-label {
-  color: var(--accent-orange);
+  color: var(--op-label-color);
 }
 
 .result-value {
@@ -399,8 +408,8 @@ body {
 }
 
 .num-input:focus {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px rgba(108, 140, 255, 0.2);
+  border-color: var(--input-focus-color);
+  box-shadow: 0 0 0 3px rgba(255, 179, 71, 0.15);
 }
 
 .pair-correct .num-input {
@@ -534,7 +543,7 @@ body {
   font-family: var(--font-display);
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--accent-blue);
+  color: var(--task-num-color);
 }
 
 .normal-inputs {
@@ -573,7 +582,7 @@ body {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.85rem;
-  color: var(--accent-orange);
+  color: var(--op-label-color);
   background: var(--bg-secondary);
   border: 1px solid var(--bg-input);
   border-radius: 4px;
@@ -581,7 +590,7 @@ body {
 }
 
 .op-input:focus {
-  border-color: var(--accent-orange);
+  border-color: var(--input-focus-color);
 }
 
 .op-input-wrapper {

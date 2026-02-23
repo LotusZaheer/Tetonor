@@ -4,21 +4,22 @@ import { useTranslation } from 'react-i18next';
 export default function LanguageSelector() {
     const { i18n } = useTranslation();
 
-    const changeLanguage = (lng) => {
-        i18n.changeLanguage(lng);
+    const toggleLanguage = () => {
+        const nextLng = i18n.language.startsWith('es') ? 'en' : 'es';
+        i18n.changeLanguage(nextLng);
     };
 
     return (
-        <div className="language-selector">
+        <div className="language-selector" onClick={toggleLanguage} style={{ cursor: 'pointer' }}>
             <button
                 className={`lang-btn ${i18n.language.startsWith('es') ? 'active' : ''}`}
-                onClick={() => changeLanguage('es')}
+                type="button"
             >
                 ES
             </button>
             <button
                 className={`lang-btn ${i18n.language.startsWith('en') ? 'active' : ''}`}
-                onClick={() => changeLanguage('en')}
+                type="button"
             >
                 EN
             </button>
