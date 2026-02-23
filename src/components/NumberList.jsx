@@ -8,15 +8,19 @@ const WheelPicker = ({ options, onSelect, onCancel, currentValue, t, letter }) =
     const listRef = React.useRef(null);
     const containerRef = React.useRef(null);
 
-    // User fix: if no currentValue, don't pre-select the first option which might be the answer.
-    // Instead center on a mid-value or stay neutral.
-    const defaultVal = currentValue !== undefined ? currentValue : options[Math.floor(options.length / 2)];
-    const [localValue, setLocalValue] = React.useState(defaultVal || options[0]);
+    // User fix: if no currentValue, start with the lowest possible number (the first option)
+    const defaultVal = currentValue !== undefined ? currentValue : options[0];
+    const [localValue, setLocalValue] = React.useState(defaultVal || (options.length > 0 ? options[0] : 1));
 
-    // Handle focus on mount
+    // Handle focus and initial scroll on mount
     React.useEffect(() => {
         if (containerRef.current) {
             containerRef.current.focus();
+        }
+        // Ensure the initial value is centered
+        if (localValue !== undefined) {
+            // Small delay to allow layout to settle
+            setTimeout(() => scrollToValue(localValue), 50);
         }
     }, []);
 
@@ -28,6 +32,10 @@ const WheelPicker = ({ options, onSelect, onCancel, currentValue, t, letter }) =
             item.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     };
+
+    // Numeric Input Buffering
+    const [buffer, setBuffer] = React.useState('');
+    const bufferTimeoutRef = React.useRef(null);
 
     // Keyboard support
     const handleKeyDown = (e) => {
@@ -52,9 +60,24 @@ const WheelPicker = ({ options, onSelect, onCancel, currentValue, t, letter }) =
         } else if (e.key === 'Escape') {
             onCancel();
         } else if (/^\d$/.test(e.key)) {
-            // Typing logic: try to find the number
-            const val = parseInt(e.key, 10);
-            const found = options.find(o => o === val || (o >= val * 10 && o < (val + 1) * 10));
+            // Typing logic: buffer digits to find specific numbers (e.g. 6 + 7 = 67)
+            const newBuffer = buffer + e.key;
+            setBuffer(newBuffer);
+
+            // Clear buffer after 1 second of inactivity
+            if (bufferTimeoutRef.current) clearTimeout(bufferTimeoutRef.current);
+            bufferTimeoutRef.current = setTimeout(() => setBuffer(''), 1000);
+
+            const targetNum = parseInt(newBuffer, 10);
+
+            // Priority 1: Exact match in options
+            let found = options.find(o => o === targetNum);
+
+            // Priority 2: If no exact match (yet), try to find first number starting with those digits
+            if (found === undefined) {
+                found = options.find(o => o.toString().startsWith(newBuffer));
+            }
+
             if (found !== undefined) {
                 setLocalValue(found);
                 scrollToValue(found);
@@ -88,42 +111,79 @@ const WheelPicker = ({ options, onSelect, onCancel, currentValue, t, letter }) =
         }
     };
 
+    // Mouse Drag-to-Scroll support
+    const [dragState, setDragState] = React.useState({ isDragging: false, startY: 0, startScroll: 0 });
+
+    const handleMouseDown = (e) => {
+        if (!listRef.current) return;
+        e.stopPropagation(); // Prevent parent slot from starting DnD
+        e.preventDefault();  // Prevent text selection/native ghost
+        setDragState({
+            isDragging: true,
+            startY: e.clientY,
+            startScroll: listRef.current.scrollTop
+        });
+    };
+
+    const handleMouseMove = (e) => {
+        if (!dragState.isDragging || !listRef.current) return;
+        e.stopPropagation();
+        const delta = dragState.startY - e.clientY;
+        listRef.current.scrollTop = dragState.startScroll + delta;
+    };
+
+    const stopDragging = (e) => {
+        if (dragState.isDragging) {
+            e?.stopPropagation();
+            setDragState(prev => ({ ...prev, isDragging: false }));
+        }
+    };
+
     return (
-        <div className="wheel-picker-overlay" onClick={onCancel}>
+        <div className="wheel-picker-overlay" onClick={onCancel} onMouseDown={(e) => e.stopPropagation()}>
             <div
                 className="wheel-picker-container"
                 onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
                 ref={containerRef}
                 tabIndex={0}
                 onKeyDown={handleKeyDown}
                 style={{ outline: 'none' }}
+                draggable={false}
             >
-                <div className="wheel-header">
+                <div className="wheel-header" onMouseDown={(e) => e.stopPropagation()}>
                     <span>{t('sidebar.variable_title', { letter: letter })}</span>
                 </div>
 
-                <div className="wheel-viewport">
-                    <div className="wheel-highlight-bar"></div>
+                <div className="wheel-viewport" onMouseDown={(e) => e.stopPropagation()}>
+                    <div className="wheel-highlight-bar" onMouseDown={(e) => e.stopPropagation()}></div>
                     <div
                         className="wheel-scroll-list"
                         ref={listRef}
                         onScroll={handleScroll}
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={stopDragging}
+                        onMouseLeave={stopDragging}
+                        style={{ cursor: dragState.isDragging ? 'grabbing' : 'grab' }}
+                        draggable={false}
                     >
-                        <div className="wheel-spacer"></div>
+                        <div className="wheel-spacer" draggable={false}></div>
                         {options.map((val) => (
                             <div
                                 key={val}
                                 className={`wheel-item ${localValue === val ? 'active' : 'neighbor'}`}
                                 data-value={val}
+                                draggable={false}
                             >
                                 {val}
                             </div>
                         ))}
-                        <div className="wheel-spacer"></div>
+                        <div className="wheel-spacer" draggable={false}></div>
                     </div>
                 </div>
 
-                <div className="wheel-actions">
+                <div className="wheel-actions" onMouseDown={(e) => e.stopPropagation()}>
                     <button className="wheel-btn cancel" onClick={onCancel}>
                         {t('sidebar.clear_guess', 'Clear')}
                     </button>
@@ -154,23 +214,21 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers,
             key: `slot-${i}`,
         }));
 
+        // 2. Mark guessed values from user state
+        items.forEach((item, i) => {
+            if (guessedValues && guessedValues[i] !== undefined) {
+                item.guessedValue = guessedValues[i];
+            }
+        });
+
         if (!usedNumbers || usedNumbers.length === 0) return items;
 
-        // 2. Claim slots for used numbers
-        // We sort usedNumbers to ensure consistent matching if there are duplicates
+        // 3. Claim slots for used numbers (correctly solved)
         const sortedUsed = [...usedNumbers].sort((a, b) => a - b);
-
         sortedUsed.forEach((val) => {
             const slot = items.find((item) => item.value === val && !item.claimed);
             if (slot) {
                 slot.claimed = true;
-            }
-        });
-
-        // 3. Mark guessed values
-        items.forEach((item, i) => {
-            if (guessedValues && guessedValues[i] !== undefined) {
-                item.guessedValue = guessedValues[i];
             }
         });
 
@@ -200,7 +258,7 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers,
         }
 
         const options = [];
-        for (let v = min + 1; v < max; v++) {
+        for (let v = min; v <= max; v++) { // Inclusive range as numbers can be repeated
             options.push(v);
         }
         return options;
@@ -260,7 +318,8 @@ export default function NumberList({ sortedNumbers, visibleIndices, usedNumbers,
                             draggableLetter = null;
                         } else if (item.guessedValue !== undefined) {
                             slotClass += ' guessed-slot';
-                            displayValue = item.guessedValue; // User fix: Show number in orange style as requested
+                            // CRITICAL: Always show the guessed number in the sidebar list
+                            displayValue = item.guessedValue;
                             draggableValue = item.guessedValue;
                         } else {
                             slotClass += ' hidden-slot';

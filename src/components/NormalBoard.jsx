@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 /**
  * Single cell for the Normal board.
  */
-function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRefs, guessedValues, puzzle }) {
+function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRefs, guessedValues, puzzle, sumCount, prodCount }) {
     const { t } = useTranslation();
     const [showOpSelector, setShowOpSelector] = React.useState(false);
     const [dragOverField, setDragOverField] = React.useState(null); // 'num1' or 'num2'
@@ -40,6 +40,16 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
         if (validOps.includes(e.key)) {
             e.preventDefault();
             const op = (e.key === 'x' || e.key === 'X') ? '*' : e.key;
+
+            // Check limits before allowing change
+            const isSum = op === '+';
+            const isProd = op === '*';
+            const currentIsSum = answer.op === '+';
+            const currentIsProd = answer.op === '*' || answer.op === 'x';
+
+            if (isSum && sumCount >= 8 && !currentIsSum) return;
+            if (isProd && prodCount >= 8 && !currentIsProd) return;
+
             onAnswerChange('op', op);
             return;
         }
@@ -67,6 +77,10 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
 
     const isGuessed1 = /^[a-h]$/.test(answer.num1) && guessedValues;
     const isGuessed2 = /^[a-h]$/.test(answer.num2) && guessedValues;
+
+    // Determine if operators are disabled
+    const plusDisabled = sumCount >= 8 && answer.op !== '+';
+    const multDisabled = prodCount >= 8 && (answer.op !== '*' && answer.op !== 'x');
 
     return (
         <div
@@ -112,12 +126,14 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
                         <div className="op-selector-tooltip">
                             <button
                                 className={`op-btn ${answer.op === '+' ? 'active' : ''}`}
-                                onClick={() => handleOpSelect('+')}
+                                onClick={() => !plusDisabled && handleOpSelect('+')}
+                                disabled={plusDisabled}
                                 type="button"
                             >+</button>
                             <button
                                 className={`op-btn ${answer.op === '*' || answer.op === 'x' ? 'active' : ''}`}
-                                onClick={() => handleOpSelect('*')}
+                                onClick={() => !multDisabled && handleOpSelect('*')}
+                                disabled={multDisabled}
                                 type="button"
                             >x</button>
                         </div>
@@ -145,6 +161,10 @@ function NormalCell({ task, answer, onAnswerChange, cellIdx, onKeyDown, inputRef
 export default function NormalBoard({ tasks, answers, onAnswerChange, guessedValues, puzzle }) {
     const { t } = useTranslation();
     const inputRefs = useRef([]);
+
+    // Calculate usage for the whole board
+    const sumCount = answers.filter(a => a.op === '+').length;
+    const prodCount = answers.filter(a => (a.op === '*' || a.op === 'x')).length;
 
     const handleKeyDown = (e, cellIdx, fieldIdx) => {
         const totalInputs = tasks.length * 3;
@@ -186,6 +206,8 @@ export default function NormalBoard({ tasks, answers, onAnswerChange, guessedVal
                         inputRefs={inputRefs}
                         guessedValues={guessedValues}
                         puzzle={puzzle}
+                        sumCount={sumCount}
+                        prodCount={prodCount}
                     />
                 ))}
             </div>

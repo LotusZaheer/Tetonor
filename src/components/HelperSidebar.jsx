@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 export default function HelperSidebar({ answers, tasks, isWeb }) {
     const { t } = useTranslation();
-    // 1. Calculate operation usage
+    // 1. Calculate operation usage (tracking board choices, not just correct ones)
     if (!answers || !tasks || answers.length !== tasks.length) return null;
-    const sumCount = answers.filter(a => a.status === 'correct' && a.op === '+').length;
-    const prodCount = answers.filter(a => a.status === 'correct' && (a.op === '*' || a.op === 'x')).length;
+    const sumCount = answers.filter(a => a.op === '+').length;
+    const prodCount = answers.filter(a => (a.op === '*' || a.op === 'x')).length;
 
     // Remaining counts (disminuyendo)
     const remainingSums = Math.max(0, 8 - sumCount);
