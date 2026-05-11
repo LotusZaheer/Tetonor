@@ -1882,3 +1882,267 @@ input:checked+.slider-wrapper .rays {
 .light-mode :focus-visible {
   outline-color: var(--accent-blue);
 }
+
+/* =============================================
+   Daily mode pill
+   ============================================= */
+.btn-mode--daily {
+  background: rgba(255, 179, 71, 0.18);
+  color: var(--accent-orange);
+  font-weight: 700;
+}
+
+.btn-mode--daily.active {
+  background: var(--gradient-main);
+  color: #fff;
+}
+
+.btn-mode--daily:hover:not(.active) {
+  background: rgba(255, 179, 71, 0.28);
+  color: var(--accent-orange);
+}
+
+/* =============================================
+   Timer chip
+   ============================================= */
+.game-timer {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.light-mode .game-timer {
+  border-color: rgba(82, 137, 173, 0.15);
+}
+
+/* =============================================
+   Victory overlay
+   ============================================= */
+.victory-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 14, 20, 0.78);
+  backdrop-filter: blur(6px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fade-in 0.25s ease;
+}
+
+.victory-card {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 24px 22px 20px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  animation: victory-pop 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  text-align: center;
+}
+
+.light-mode .victory-card {
+  box-shadow: 0 24px 60px rgba(82, 137, 173, 0.18);
+  border-color: rgba(82, 137, 173, 0.18);
+}
+
+@keyframes victory-pop {
+  0% {
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.04) translateY(-2px);
+  }
+
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.victory-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+}
+
+.victory-title {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  background: var(--gradient-main);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2px;
+}
+
+.victory-subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.victory-time {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent-orange);
+  margin-bottom: 14px;
+  letter-spacing: 0.02em;
+}
+
+.light-mode .victory-time {
+  color: var(--accent-blue);
+}
+
+.victory-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.victory-stats > div {
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.victory-stats dt {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.victory-stats dd {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.victory-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.victory-share {
+  width: 100%;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--bg-input);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent-orange);
+  color: var(--text-primary);
+}
+
+.victory-hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* =============================================
+   Victory confetti (CSS-only, no library)
+   ============================================= */
+.victory-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.victory-confetti span {
+  position: absolute;
+  top: -10%;
+  font-size: 1.4rem;
+  animation: confetti-fall 2.2s linear infinite;
+  opacity: 0.9;
+}
+
+.victory-confetti span:nth-child(1) {
+  left: 12%;
+  animation-delay: 0s;
+}
+
+.victory-confetti span:nth-child(2) {
+  left: 28%;
+  animation-delay: 0.3s;
+}
+
+.victory-confetti span:nth-child(3) {
+  left: 48%;
+  animation-delay: 0.6s;
+}
+
+.victory-confetti span:nth-child(4) {
+  left: 64%;
+  animation-delay: 0.15s;
+}
+
+.victory-confetti span:nth-child(5) {
+  left: 78%;
+  animation-delay: 0.9s;
+}
+
+.victory-confetti span:nth-child(6) {
+  left: 90%;
+  animation-delay: 0.45s;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(110vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .victory-confetti {
+    display: none;
+  }
+
+  .victory-card {
+    animation: none;
+  }
+}

@@ -7,18 +7,24 @@ import NormalBoard from './components/NormalBoard';
 import RulesModal from './components/RulesModal';
 import ThemeToggle from './components/ThemeToggle';
 import LanguageSelector from './components/LanguageSelector';
+import VictoryOverlay from './components/VictoryOverlay';
 import { useGameState } from './hooks/useGameState';
+import { useGameTimer } from './hooks/useGameTimer';
+import { getModeStats, loadStats, recordWin, saveStats, type StatsByMode } from './utils/stats';
 import type { GameMode } from './types/game';
 
 const PAIR_MODES: readonly GameMode[] = ['very_easy', 'easy'];
-const TASK_MODES: readonly GameMode[] = ['normal', 'rapido'];
+const TASK_MODES: readonly GameMode[] = ['normal', 'rapido', 'daily'];
 
 export default function App() {
   const { t } = useTranslation();
   const [showRules, setShowRules] = useState(false);
+  const [showVictory, setShowVictory] = useState(false);
+  const [stats, setStats] = useState<StatsByMode>(() => loadStats());
   const [statusMessage, setStatusMessage] = useState('');
+  const [finalTimeMs, setFinalTimeMs] = useState<number | null>(null);
   const previousPuzzleRef = useRef<unknown>(null);
-  const helpButtonRef = useRef<HTMLButtonElement | null>(null);
+  const recordedSolveRef = useRef<unknown>(null);
 
   const {
     mode,
@@ -30,6 +36,9 @@ export default function App() {
     limit,
     remainingSums,
     remainingProds,
+    correctCount,
+    totalCells,
+    dailyKey,
     setMode,
     startNewGame,
     setGuessedValues,
@@ -37,18 +46,35 @@ export default function App() {
     updateNormalAnswer,
   } = useGameState('rapido');
 
-  useEffect(() => {
-    if (isSolved) {
-      setStatusMessage(t('a11y.solved_announcement', '¡Puzzle resuelto!'));
-    }
-  }, [isSolved, t]);
+  const timer = useGameTimer(puzzle, !!puzzle && !isSolved);
 
   useEffect(() => {
     if (puzzle && puzzle !== previousPuzzleRef.current) {
       previousPuzzleRef.current = puzzle;
       setStatusMessage(t('a11y.new_game_announcement', 'Nuevo juego cargado'));
+      setShowVictory(false);
+      setFinalTimeMs(null);
+      recordedSolveRef.current = null;
     }
   }, [puzzle, t]);
+
+  useEffect(() => {
+    if (!isSolved || !puzzle || recordedSolveRef.current === puzzle) return;
+    recordedSolveRef.current = puzzle;
+    const elapsed = timer.elapsedMs;
+    setFinalTimeMs(elapsed);
+    setStats((prev) => {
+      const next = recordWin(prev, {
+        mode,
+        timeMs: elapsed,
+        dailyKey: dailyKey ?? undefined,
+      });
+      saveStats(next);
+      return next;
+    });
+    setStatusMessage(t('a11y.solved_announcement', '¡Puzzle resuelto!'));
+    setShowVictory(true);
+  }, [isSolved, puzzle, mode, dailyKey, timer.elapsedMs, t]);
 
   const renderContent = () => {
     if (mode === 'hard') {
@@ -181,11 +207,12 @@ export default function App() {
     );
   };
 
+  const overlayTime = finalTimeMs ?? timer.elapsedMs;
+
   return (
     <div className={`app-container mode-${mode.replace('_', '-')}`}>
       <ThemeToggle />
       <button
-        ref={helpButtonRef}
         className="help-icon"
         onClick={() => setShowRules(true)}
         title={t('rules.view_rules')}
@@ -205,9 +232,27 @@ export default function App() {
         isSolved={isSolved}
         currentMode={mode}
         onSetMode={setMode}
+        elapsedMs={timer.elapsedMs}
+        showTimer={!!puzzle && mode !== 'hard'}
       />
       <main className="game-main">{renderContent()}</main>
       <LanguageSelector />
+
+      {showVictory && (
+        <VictoryOverlay
+          mode={mode}
+          timeMs={overlayTime}
+          totalCells={totalCells}
+          correctCells={correctCount}
+          stats={getModeStats(stats, mode)}
+          dailyKey={dailyKey}
+          onClose={() => setShowVictory(false)}
+          onNewGame={() => {
+            setShowVictory(false);
+            startNewGame();
+          }}
+        />
+      )}
     </div>
   );
 }

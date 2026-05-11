@@ -15,7 +15,24 @@ const resources: Resource = {
                 "very_easy": "mini",
                 "rapido": "fast",
                 "normal": "normal",
-                "hard": "hard"
+                "hard": "hard",
+                "daily": "daily",
+                "timer_label": "Elapsed time"
+            },
+            "victory": {
+                "title": "Solved!",
+                "mode_subtitle": "Mode: {{mode}}",
+                "daily_subtitle": "Daily puzzle {{date}}",
+                "played": "Played",
+                "success_rate": "Success",
+                "streak": "Streak",
+                "best_time": "Best",
+                "share": "Share result",
+                "copied": "Copied!",
+                "copy_failed": "Could not copy",
+                "new_game": "New game",
+                "come_back_tomorrow": "Come back tomorrow",
+                "come_back_tomorrow_hint": "A new puzzle drops tomorrow."
             },
             "board": {
                 "tablero": "BOARD",
@@ -71,7 +88,24 @@ const resources: Resource = {
                 "very_easy": "mini",
                 "rapido": "rápido",
                 "normal": "normal",
-                "hard": "difícil"
+                "hard": "difícil",
+                "daily": "diario",
+                "timer_label": "Tiempo transcurrido"
+            },
+            "victory": {
+                "title": "¡Resuelto!",
+                "mode_subtitle": "Modo: {{mode}}",
+                "daily_subtitle": "Reto diario {{date}}",
+                "played": "Jugadas",
+                "success_rate": "Éxito",
+                "streak": "Racha",
+                "best_time": "Mejor",
+                "share": "Compartir resultado",
+                "copied": "¡Copiado!",
+                "copy_failed": "No se pudo copiar",
+                "new_game": "Nueva partida",
+                "come_back_tomorrow": "Vuelve mañana",
+                "come_back_tomorrow_hint": "Mañana llega un nuevo puzzle."
             },
             "board": {
                 "tablero": "TABLERO",

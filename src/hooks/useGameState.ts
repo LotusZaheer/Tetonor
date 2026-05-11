@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { checkPairAnswer, checkTask, generateMiniPuzzle, generatePuzzle } from '../utils/gameEngine';
+import {
+  checkPairAnswer,
+  checkTask,
+  generateMiniPuzzle,
+  generatePuzzle,
+  generatePuzzleFromSeed,
+} from '../utils/gameEngine';
 import { resolveValue } from '../utils/gameLogic';
+import { dailyKey as buildDailyKey, dailySeed } from '../utils/rng';
 import type {
   Answer,
   GameMode,
@@ -12,7 +19,7 @@ import type {
 
 const SMALL_MODES: readonly GameMode[] = ['very_easy', 'rapido'];
 const PAIR_MODES: readonly GameMode[] = ['very_easy', 'easy'];
-const TASK_MODES: readonly GameMode[] = ['normal', 'rapido'];
+const TASK_MODES: readonly GameMode[] = ['normal', 'rapido', 'daily'];
 const FAST_LIMIT = 4;
 const STANDARD_LIMIT = 8;
 
@@ -41,6 +48,9 @@ export interface UseGameState {
   limit: number;
   remainingSums: number;
   remainingProds: number;
+  correctCount: number;
+  totalCells: number;
+  dailyKey: string | null;
   setMode: (mode: GameMode) => void;
   startNewGame: () => void;
   setGuessedValues: React.Dispatch<React.SetStateAction<GuessedValues>>;
@@ -54,6 +64,7 @@ export function useGameState(initialMode: GameMode = 'rapido'): UseGameState {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [guessedValues, setGuessedValues] = useState<GuessedValues>({});
   const [isSolved, setIsSolved] = useState(false);
+  const [dailyKey, setDailyKey] = useState<string | null>(null);
 
   const startNewGame = useCallback(() => {
     if (mode === 'hard') {
@@ -61,9 +72,17 @@ export function useGameState(initialMode: GameMode = 'rapido'): UseGameState {
       setAnswers([]);
       setGuessedValues({});
       setIsSolved(false);
+      setDailyKey(null);
       return;
     }
-    const nextPuzzle = SMALL_MODES.includes(mode) ? generateMiniPuzzle() : generatePuzzle();
+    let nextPuzzle: Puzzle;
+    if (mode === 'daily') {
+      nextPuzzle = generatePuzzleFromSeed(dailySeed(), 16);
+      setDailyKey(buildDailyKey());
+    } else {
+      nextPuzzle = SMALL_MODES.includes(mode) ? generateMiniPuzzle() : generatePuzzle();
+      setDailyKey(null);
+    }
     setPuzzle(nextPuzzle);
     setAnswers(createInitialAnswers(answerCount(mode, nextPuzzle), TASK_MODES.includes(mode)));
     setGuessedValues({});
@@ -180,6 +199,8 @@ export function useGameState(initialMode: GameMode = 'rapido'): UseGameState {
   const prodCount = answers.filter((a) => a.op === '*' || a.op === 'x').length;
   const remainingSums = Math.max(0, limit - sumCount);
   const remainingProds = Math.max(0, limit - prodCount);
+  const correctCount = answers.filter((a) => a.status === 'correct').length;
+  const totalCells = answers.length;
 
   return {
     mode,
@@ -193,6 +214,9 @@ export function useGameState(initialMode: GameMode = 'rapido'): UseGameState {
     limit,
     remainingSums,
     remainingProds,
+    correctCount,
+    totalCells,
+    dailyKey,
     setMode,
     startNewGame,
     setGuessedValues,
