@@ -2146,3 +2146,52 @@ input:checked+.slider-wrapper .rays {
     animation: none;
   }
 }
+
+/* =============================================
+   Micro-animations (Phase 4 polish)
+   ============================================= */
+@keyframes correct-bloom {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 224, 165, 0.5);
+  }
+
+  60% {
+    box-shadow: 0 0 0 14px rgba(76, 224, 165, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 224, 165, 0);
+  }
+}
+
+.pair-column.pair-correct,
+.normal-cell.pair-correct {
+  animation: correct-bloom 0.55s ease-out;
+}
+
+@keyframes board-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.board-grid,
+.normal-grid {
+  animation: board-fade-in 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .pair-column.pair-correct,
+  .normal-cell.pair-correct,
+  .board-grid,
+  .normal-grid {
+    animation: none !important;
+  }
+}
