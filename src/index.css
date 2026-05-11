@@ -95,12 +95,12 @@ body {
   font-family: var(--font-body);
   background: var(--bg-primary);
   color: var(--text-primary);
-  min-height: 100vh;
+  min-height: 100dvh;
   line-height: 1.4;
 }
 
 #root {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -115,7 +115,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--gap-sm);
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -347,6 +347,7 @@ body {
   box-shadow: var(--shadow-card);
   transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
   border: 2px solid transparent;
+  position: relative;
 }
 
 .pair-column:nth-child(7) {
@@ -673,6 +674,7 @@ body {
   border: 1px solid transparent;
   box-shadow: var(--shadow-card);
   transition: all var(--transition-normal);
+  position: relative;
 }
 
 .normal-cell.pair-correct {
@@ -1000,7 +1002,7 @@ body {
   .app-container {
     padding: var(--gap-sm);
     height: auto;
-    min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
   }
 
@@ -1588,7 +1590,7 @@ input:checked+.slider-wrapper .rays {
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
   z-index: 2000;
@@ -1772,4 +1774,111 @@ input:checked+.slider-wrapper .rays {
   border-color: var(--accent-orange) !important;
   background: rgba(255, 179, 71, 0.1) !important;
   transform: scale(1.05);
+}
+
+/* =============================================
+   Accessibility — status icons (colorblind-safe)
+   ============================================= */
+.pair-column.pair-correct::after,
+.normal-cell.pair-correct::after {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  color: var(--accent-green);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.pair-column.pair-wrong::after,
+.normal-cell.pair-wrong::after {
+  content: '✗';
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  color: var(--accent-red);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* =============================================
+   Accessibility — visually hidden helper
+   (used for aria-live status announcements)
+   ============================================= */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =============================================
+   Accessibility — minimum touch targets on coarse pointers
+   (WCAG 2.5.5 AAA: 44×44 CSS pixels)
+   ============================================= */
+@media (pointer: coarse), (max-width: 480px) {
+  .btn-mode,
+  .btn-new-game,
+  .lang-btn,
+  .wheel-btn,
+  .op-btn,
+  .help-icon,
+  .close-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .help-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+  }
+
+  .lang-btn {
+    padding: 6px 14px;
+  }
+}
+
+/* =============================================
+   Accessibility — respect prefers-reduced-motion
+   ============================================= */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .pair-column.pair-wrong,
+  .normal-cell.pair-wrong {
+    animation: none !important;
+  }
+}
+
+/* =============================================
+   Accessibility — visible focus ring
+   ============================================= */
+:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.light-mode :focus-visible {
+  outline-color: var(--accent-blue);
 }
