@@ -1,4 +1,4 @@
-export type GameMode = 'very_easy' | 'easy' | 'rapido' | 'normal' | 'hard';
+export type GameMode = 'very_easy' | 'easy' | 'rapido' | 'normal' | 'hard' | 'daily';
 
 export type Operation = '+' | '*';
 

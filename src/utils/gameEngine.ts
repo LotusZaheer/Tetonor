@@ -1,22 +1,14 @@
 import type { NormalTask, Operation, Pair, Puzzle } from '../types/game';
+import { mulberry32, randomIntFrom, shuffleWith } from './rng';
 
 const MAX_GENERATION_ATTEMPTS = 100;
 
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+type RNG = () => number;
 
-function shuffle<T>(array: readonly T[]): T[] {
-  const arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j]!, arr[i]!];
-  }
-  return arr;
-}
+const defaultRng: RNG = Math.random;
 
-function buildPairs(numbers: readonly number[]): Pair[] {
-  const shuffled = shuffle(numbers);
+function buildPairs(rng: RNG, numbers: readonly number[]): Pair[] {
+  const shuffled = shuffleWith(rng, numbers);
   const pairs: Pair[] = [];
   for (let i = 0; i < shuffled.length; i += 2) {
     const a = shuffled[i]!;
@@ -26,13 +18,13 @@ function buildPairs(numbers: readonly number[]): Pair[] {
   return pairs;
 }
 
-function buildNormalTasks(pairs: readonly Pair[]): NormalTask[] {
+function buildNormalTasks(rng: RNG, pairs: readonly Pair[]): NormalTask[] {
   const tasks: NormalTask[] = [];
   for (const p of pairs) {
     tasks.push({ value: p.sum, type: '+', target: [p.a, p.b] });
     tasks.push({ value: p.product, type: '*', target: [p.a, p.b] });
   }
-  return shuffle(tasks);
+  return shuffleWith(rng, tasks);
 }
 
 /**
@@ -50,41 +42,44 @@ function pairsHaveUniqueSolutions(pairs: readonly Pair[]): boolean {
   return true;
 }
 
-function pickVisibleIndices(total: number, visibleCount: number): { visible: Set<number>; hidden: Set<number> } {
+function pickVisibleIndices(
+  rng: RNG,
+  total: number,
+  visibleCount: number,
+): { visible: Set<number>; hidden: Set<number> } {
   const indices = Array.from({ length: total }, (_, i) => i);
-  const shuffled = shuffle(indices);
+  const shuffled = shuffleWith(rng, indices);
   return {
     visible: new Set(shuffled.slice(0, visibleCount)),
     hidden: new Set(shuffled.slice(visibleCount)),
   };
 }
 
-function generateSizedPuzzle(numberCount: number): Puzzle {
+function generateSizedPuzzle(numberCount: number, rng: RNG): Puzzle {
   for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
-    const numbers = Array.from({ length: numberCount }, () => randomInt(1, 99));
-    const pairs = buildPairs(numbers);
+    const numbers = Array.from({ length: numberCount }, () => randomIntFrom(rng, 1, 99));
+    const pairs = buildPairs(rng, numbers);
     if (!pairsHaveUniqueSolutions(pairs)) continue;
 
     const sortedNumbers = [...numbers].sort((x, y) => x - y);
-    const { visible, hidden } = pickVisibleIndices(numberCount, numberCount / 2);
+    const { visible, hidden } = pickVisibleIndices(rng, numberCount, numberCount / 2);
 
     return {
       pairs,
-      normalTasks: buildNormalTasks(pairs),
+      normalTasks: buildNormalTasks(rng, pairs),
       sortedNumbers,
       visibleIndices: visible,
       hiddenIndices: hidden,
     };
   }
 
-  // Fallback: extremely unlikely, but never block the UI.
-  const numbers = Array.from({ length: numberCount }, () => randomInt(1, 99));
-  const pairs = buildPairs(numbers);
+  const numbers = Array.from({ length: numberCount }, () => randomIntFrom(rng, 1, 99));
+  const pairs = buildPairs(rng, numbers);
   const sortedNumbers = [...numbers].sort((x, y) => x - y);
-  const { visible, hidden } = pickVisibleIndices(numberCount, numberCount / 2);
+  const { visible, hidden } = pickVisibleIndices(rng, numberCount, numberCount / 2);
   return {
     pairs,
-    normalTasks: buildNormalTasks(pairs),
+    normalTasks: buildNormalTasks(rng, pairs),
     sortedNumbers,
     visibleIndices: visible,
     hiddenIndices: hidden,
@@ -92,11 +87,15 @@ function generateSizedPuzzle(numberCount: number): Puzzle {
 }
 
 export function generatePuzzle(): Puzzle {
-  return generateSizedPuzzle(16);
+  return generateSizedPuzzle(16, defaultRng);
 }
 
 export function generateMiniPuzzle(): Puzzle {
-  return generateSizedPuzzle(8);
+  return generateSizedPuzzle(8, defaultRng);
+}
+
+export function generatePuzzleFromSeed(seed: number, size: 8 | 16 = 16): Puzzle {
+  return generateSizedPuzzle(size, mulberry32(seed));
 }
 
 export function normalizeOperation(op: string): Operation | null {
