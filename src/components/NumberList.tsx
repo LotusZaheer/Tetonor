@@ -123,6 +123,8 @@ function WheelPicker({ options, onSelect, onCancel, currentValue, letter }: Whee
     }
   };
 
+  const dialogLabel = t('sidebar.variable_title', { letter: letter ?? '' });
+
   return (
     <div className="wheel-picker-overlay" onClick={onCancel} onMouseDown={(e) => e.stopPropagation()}>
       <div
@@ -133,9 +135,12 @@ function WheelPicker({ options, onSelect, onCancel, currentValue, letter }: Whee
         tabIndex={0}
         onKeyDown={handleKeyDown}
         style={{ outline: 'none' }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={dialogLabel}
       >
         <div className="wheel-header" onMouseDown={(e) => e.stopPropagation()}>
-          <span>{t('sidebar.variable_title', { letter: letter ?? '' })}</span>
+          <span>{dialogLabel}</span>
         </div>
 
         <div className="wheel-viewport" onMouseDown={(e) => e.stopPropagation()}>
@@ -149,18 +154,24 @@ function WheelPicker({ options, onSelect, onCancel, currentValue, letter }: Whee
             onMouseUp={stopDragging}
             onMouseLeave={stopDragging}
             style={{ cursor: dragState.isDragging ? 'grabbing' : 'grab' }}
+            role="listbox"
+            aria-activedescendant={`wheel-option-${localValue}`}
+            aria-label={dialogLabel}
           >
-            <div className="wheel-spacer"></div>
+            <div className="wheel-spacer" aria-hidden="true"></div>
             {options.map((val) => (
               <div
                 key={val}
+                id={`wheel-option-${val}`}
                 className={`wheel-item ${localValue === val ? 'active' : 'neighbor'}`}
                 data-value={val}
+                role="option"
+                aria-selected={localValue === val}
               >
                 {val}
               </div>
             ))}
-            <div className="wheel-spacer"></div>
+            <div className="wheel-spacer" aria-hidden="true"></div>
           </div>
         </div>
 
