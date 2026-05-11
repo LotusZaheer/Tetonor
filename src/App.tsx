@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import GameHeader from './components/GameHeader';
 import Board from './components/Board';
@@ -16,6 +16,9 @@ const TASK_MODES: readonly GameMode[] = ['normal', 'rapido'];
 export default function App() {
   const { t } = useTranslation();
   const [showRules, setShowRules] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const previousPuzzleRef = useRef<unknown>(null);
+  const helpButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const {
     mode,
@@ -33,6 +36,19 @@ export default function App() {
     updateEasyAnswer,
     updateNormalAnswer,
   } = useGameState('rapido');
+
+  useEffect(() => {
+    if (isSolved) {
+      setStatusMessage(t('a11y.solved_announcement', '¡Puzzle resuelto!'));
+    }
+  }, [isSolved, t]);
+
+  useEffect(() => {
+    if (puzzle && puzzle !== previousPuzzleRef.current) {
+      previousPuzzleRef.current = puzzle;
+      setStatusMessage(t('a11y.new_game_announcement', 'Nuevo juego cargado'));
+    }
+  }, [puzzle, t]);
 
   const renderContent = () => {
     if (mode === 'hard') {
@@ -169,12 +185,18 @@ export default function App() {
     <div className={`app-container mode-${mode.replace('_', '-')}`}>
       <ThemeToggle />
       <button
+        ref={helpButtonRef}
         className="help-icon"
         onClick={() => setShowRules(true)}
         title={t('rules.view_rules')}
+        aria-label={t('rules.view_rules')}
       >
         ?
       </button>
+
+      <div role="status" aria-live="polite" className="sr-only">
+        {statusMessage}
+      </div>
 
       {showRules && <RulesModal onClose={() => setShowRules(false)} />}
 

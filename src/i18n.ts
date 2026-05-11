@@ -51,6 +51,11 @@ const resources: Resource = {
                 "clear_guess": "Clear",
                 "no_options": "No middle values",
                 "variable_title": "Variable {{letter}}"
+            },
+            "a11y": {
+                "solved_announcement": "Puzzle solved!",
+                "new_game_announcement": "New game loaded",
+                "mode_changed": "Mode changed to {{mode}}"
             }
         }
     },
@@ -102,6 +107,11 @@ const resources: Resource = {
                 "clear_guess": "Limpiar",
                 "no_options": "Sin valores intermedios",
                 "variable_title": "Variable {{letter}}"
+            },
+            "a11y": {
+                "solved_announcement": "¡Puzzle resuelto!",
+                "new_game_announcement": "Nuevo juego cargado",
+                "mode_changed": "Modo cambiado a {{mode}}"
             }
         }
     }
